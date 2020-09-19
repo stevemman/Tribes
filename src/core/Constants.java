@@ -1,6 +1,8 @@
 package core;
 
 public class Constants {
+    public static boolean USE_ATTACK_FM = true;
+    public static boolean USE_BUILD_FM = true;
     public static boolean KEEP_LOG = false;
     public static String LOG_PATH = "./data.csv";
     public static boolean VERBOSE = false;
