@@ -17,9 +17,10 @@ public class Building {
 
     /**
      * Creates a new building
-     * @param x x position of this building
-     * @param y y position of this building
-     * @param type type of this new building.
+     *
+     * @param x      x position of this building
+     * @param y      y position of this building
+     * @param type   type of this new building.
      * @param cityId id of the city this building belongs to
      */
     public Building(int x, int y, Types.BUILDING type, int cityId) {
@@ -30,10 +31,11 @@ public class Building {
 
     /**
      * Creates a new building from a JSON object
-     * @param obj object to read the building from
+     *
+     * @param obj    object to read the building from
      * @param cityID id of the city
      */
-    public Building(JSONObject obj, int cityID){
+    public Building(JSONObject obj, int cityID) {
         this.position = new Vector2d(obj.getInt("x"), obj.getInt("y"));
         this.type = Types.BUILDING.getTypeByKey(obj.getInt("type"));
         this.cityId = cityID;
@@ -41,19 +43,20 @@ public class Building {
 
     /**
      * Returns a copy of this building.
+     *
      * @return a copy of this building.
      */
-    public Building copy()
-    {
+    public Building copy() {
         return new Building(position.x, position.y, type, cityId);
     }
 
     /**
      * Returns the bonus this building provides to the city. This can be
      * production or population.
+     *
      * @return the bonus this building provides to the city.
      */
-    int getBonus(){
+    int getBonus() {
         return type.getBonus();
     }
 }

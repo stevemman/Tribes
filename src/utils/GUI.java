@@ -2,20 +2,21 @@ package utils;
 
 import core.Constants;
 import core.Types;
+import core.actions.Action;
 import core.actions.tribeactions.EndTurn;
 import core.actions.tribeactions.TribeAction;
 import core.actions.unitactions.*;
 import core.actors.units.Unit;
 import core.game.Game;
 import core.game.GameState;
-import core.actions.Action;
 import players.ActionController;
 import players.HumanAgent;
 import players.KeyController;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,62 +26,57 @@ import static core.Constants.*;
 import static core.Types.ACTION.*;
 
 public class GUI extends JFrame {
+    public static double screenDiagonal;
+    double scale = 1;
     private JLabel appTurn;
     private JLabel activeTribe, activeTribeInfo, otherInfo;
     private int otherInfoDelay = GUI_INFO_DELAY;
     private int levelingUp = 0;
-
-    private Game game;
+    private final Game game;
     private GameState gs;
-
-    private ArrayList<HashMap<Integer,ArrayList<Action>>> actionHistory;
-    private ArrayList<GameState> stateHistory;
-    private ActionController replayer;
+    private final ArrayList<HashMap<Integer, ArrayList<Action>>> actionHistory;
+    private final ArrayList<GameState> stateHistory;
+    private final ActionController replayer;
     private boolean pauseAfterTurn = false;  // If game should automatically pause after one turn (of one tribe) is played
     private boolean pauseAfterTick = false;  // If game should automatically pause after one tick (all tribes) is played
-
-//    private KeyController ki;
-    private WindowInput wi;
-    private ActionController ac;
+    //    private KeyController ki;
+    private final WindowInput wi;
+    private final ActionController ac;
     private Examine lastExamineAction;
-
-    private GameView boardView;
+    private final GameView boardView;
     private TribeView tribeView;
     private TechView techView;
-    private InfoView infoView;
-
+    private final InfoView infoView;
     // Zoomed screen dragging vars
     private Vector2d startDrag, endDrag, panTranslate;
 
-    public static double screenDiagonal;
-    double scale = 1;
-
     /**
      * Constructor
+     *
      * @param title Title of the window.
      */
     public GUI(Game game, String title, KeyController ki, WindowInput wi, ActionController ac, boolean closeAppOnClosingWindow) {
         super(title);
 
         try {
-            UIManager.setLookAndFeel( UIManager.getCrossPlatformLookAndFeelClassName() );
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         Rectangle rect = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-        screenDiagonal = Math.sqrt(rect.width*rect.width + rect.height* rect.height);
+        screenDiagonal = Math.sqrt(rect.width * rect.width + rect.height * rect.height);
 
-        CELL_SIZE = (int)(0.038*screenDiagonal*scale);
-        GUI_GAME_VIEW_SIZE = (int)(0.36*screenDiagonal*scale);
-        GUI_MIN_PAN = (int)(0.015*screenDiagonal*scale);
-        GUI_COMP_SPACING = (int)(0.0045*screenDiagonal*scale);
-        GUI_CITY_TAG_WIDTH = (int)(0.009*screenDiagonal*scale);
-        GUI_SIDE_PANEL_WIDTH = (int)(0.25*screenDiagonal*scale);
-        GUI_INFO_PANEL_HEIGHT = (int)(0.18*screenDiagonal*scale);
-        GUI_ACTION_PANEL_HEIGHT = (int)(0.045*screenDiagonal*scale);
-        GUI_TECH_PANEL_HEIGHT = (int)(0.16*screenDiagonal*scale);
-        GUI_TECH_PANEL_FULL_SIZE = (int)(GUI_TECH_PANEL_FULL_SIZE*(1/scale));
+        CELL_SIZE = (int) (0.038 * screenDiagonal * scale);
+        GUI_GAME_VIEW_SIZE = (int) (0.36 * screenDiagonal * scale);
+        GUI_MIN_PAN = (int) (0.015 * screenDiagonal * scale);
+        GUI_COMP_SPACING = (int) (0.0045 * screenDiagonal * scale);
+        GUI_CITY_TAG_WIDTH = (int) (0.009 * screenDiagonal * scale);
+        GUI_SIDE_PANEL_WIDTH = (int) (0.25 * screenDiagonal * scale);
+        GUI_INFO_PANEL_HEIGHT = (int) (0.18 * screenDiagonal * scale);
+        GUI_ACTION_PANEL_HEIGHT = (int) (0.045 * screenDiagonal * scale);
+        GUI_TECH_PANEL_HEIGHT = (int) (0.16 * screenDiagonal * scale);
+        GUI_TECH_PANEL_FULL_SIZE = (int) (GUI_TECH_PANEL_FULL_SIZE * (1 / scale));
 
 //        this.ki = ki;
         this.ac = ac;
@@ -92,7 +88,7 @@ public class GUI extends JFrame {
         this.replayer = new ActionController();
 
         infoView = new InfoView(ac);
-        panTranslate = new Vector2d(0,0);
+        panTranslate = new Vector2d(0, 0);
         boardView = new GameView(game, infoView, panTranslate);
 
         // Create frame layout
@@ -133,15 +129,33 @@ public class GUI extends JFrame {
         pack();
         this.setVisible(true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        if(closeAppOnClosingWindow){
+        if (closeAppOnClosingWindow) {
             setDefaultCloseOperation(EXIT_ON_CLOSE);
         }
         repaint();
     }
 
+    public static Vector2d getActionPosition(GameState gs, Action a) {
+        Vector2d pos = null;
+        if (a.getActionType() == MOVE) {
+            pos = new Vector2d(((Move) a).getDestination().x, ((Move) a).getDestination().y);
+        } else if (a.getActionType() == ATTACK) {
+            Unit target = (Unit) gs.getActor(((Attack) a).getTargetId());
+            pos = target.getPosition();
+        } else if (a.getActionType() == RECOVER) {
+            Unit u = (Unit) gs.getActor(((UnitAction) a).getUnitId());
+            pos = u.getPosition();
+        } else if (a.getActionType() == CAPTURE || a.getActionType() == EXAMINE) {
+            Unit u = (Unit) gs.getActor(((UnitAction) a).getUnitId());
+            pos = new Vector2d(u.getPosition().x - 1, u.getPosition().y);
+        } else if (a.getActionType() == CONVERT) {
+            Unit target = (Unit) gs.getActor(((Convert) a).getTargetId());
+            pos = target.getPosition();
+        }
+        return pos;
+    }
 
-    private JPanel createGamePanel()
-    {
+    private JPanel createGamePanel() {
         JPanel mainPanel = new JPanel();
 
         mainPanel.addMouseListener(new MouseListener() {
@@ -150,7 +164,7 @@ public class GUI extends JFrame {
                 //Only provide information if clicking on a visible tile
                 Vector2d translate = boardView.getPanTranslate();
                 Vector2d ep = new Vector2d(e.getX() - translate.x, e.getY() - translate.y);
-                Vector2d p = GameView.rotatePointReverse((int)ep.x, (int)ep.y);
+                Vector2d p = GameView.rotatePointReverse(ep.x, ep.y);
 
                 // If unit highlighted and action at new click valid for unit, execute action
                 if (game.getPlayers()[gs.getActiveTribeID()] instanceof HumanAgent ||
@@ -190,7 +204,7 @@ public class GUI extends JFrame {
             public void mouseReleased(MouseEvent e) {
                 endDrag = new Vector2d(e.getX(), e.getY());
                 if (startDrag != null && !(startDrag.equals(endDrag))) {
-                    panTranslate = new Vector2d(+ endDrag.x - startDrag.x, + endDrag.y - startDrag.y);
+                    panTranslate = new Vector2d(+endDrag.x - startDrag.x, +endDrag.y - startDrag.y);
                     if (panTranslate.dist(0, 0) >= GUI_MIN_PAN) {
                         boardView.updatePan(panTranslate);
                         infoView.resetHighlight();
@@ -211,13 +225,13 @@ public class GUI extends JFrame {
         mainPanel.addMouseWheelListener(e -> {
             Point2D mouseLocation = MouseInfo.getPointerInfo().getLocation();
             Point2D panelLocation = mainPanel.getLocationOnScreen();
-            Vector2d viewCenter = new Vector2d(boardView.getPreferredSize().width/2, boardView.getPreferredSize().height/2);
-            Vector2d diff = new Vector2d((int)(mouseLocation.getX() - panelLocation.getX() - viewCenter.x)/GUI_ZOOM_FACTOR,
-                    (int)(mouseLocation.getY() - panelLocation.getY() - viewCenter.y)/GUI_ZOOM_FACTOR);
+            Vector2d viewCenter = new Vector2d(boardView.getPreferredSize().width / 2, boardView.getPreferredSize().height / 2);
+            Vector2d diff = new Vector2d((int) (mouseLocation.getX() - panelLocation.getX() - viewCenter.x) / GUI_ZOOM_FACTOR,
+                    (int) (mouseLocation.getY() - panelLocation.getY() - viewCenter.y) / GUI_ZOOM_FACTOR);
             if (e.getWheelRotation() < 0) {
                 // Zooming in
                 CELL_SIZE += GUI_ZOOM_FACTOR;
-                diff = new Vector2d(diff.x*-1, diff.y*-1);
+                diff = new Vector2d(diff.x * -1, diff.y * -1);
             } else {
                 // Zooming out
                 CELL_SIZE -= GUI_ZOOM_FACTOR;
@@ -231,13 +245,13 @@ public class GUI extends JFrame {
         c.weighty = 0;
 
         c.gridy = 0;
-        mainPanel.add(Box.createRigidArea(new Dimension(0, GUI_COMP_SPACING/2)), c);
+        mainPanel.add(Box.createRigidArea(new Dimension(0, GUI_COMP_SPACING / 2)), c);
 
         c.gridy++;
         mainPanel.add(boardView, c);
 
         c.gridy++;
-        mainPanel.add(Box.createRigidArea(new Dimension(0, GUI_COMP_SPACING/2)), c);
+        mainPanel.add(Box.createRigidArea(new Dimension(0, GUI_COMP_SPACING / 2)), c);
 
         return mainPanel;
     }
@@ -252,12 +266,12 @@ public class GUI extends JFrame {
      * - all tribes points ranking
      * - tech tree view
      * - buttons to "End Turn", "Play Turn" (game paused after tribe's turn), "Play Tick" (game paused after all tribe's
-     *      turns in current tick), "Pause/Resume" (to pause/resume game at any point), all keeping GUI responsive
+     * turns in current tick), "Pause/Resume" (to pause/resume game at any point), all keeping GUI responsive
      * - quick select buttons (all units / units of type / cities of a tribe) for info display TODO
+     *
      * @return JPanel containing all the sub components
      */
-    private JPanel createSidePanel()
-    {
+    private JPanel createSidePanel() {
         JPanel sidePanel = new JPanel();
         sidePanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -290,13 +304,13 @@ public class GUI extends JFrame {
         sidePanel.add(appTitle, c);
 
         c.gridy++;
-        sidePanel.add(Box.createRigidArea(new Dimension(0, GUI_COMP_SPACING/2)), c);
+        sidePanel.add(Box.createRigidArea(new Dimension(0, GUI_COMP_SPACING / 2)), c);
 
         c.gridy++;
         sidePanel.add(appTurn, c);
 
         c.gridy++;
-        sidePanel.add(Box.createRigidArea(new Dimension(0, GUI_COMP_SPACING/2)), c);
+        sidePanel.add(Box.createRigidArea(new Dimension(0, GUI_COMP_SPACING / 2)), c);
 
         c.gridy++;
         sidePanel.add(activeTribe, c);
@@ -306,28 +320,34 @@ public class GUI extends JFrame {
         sidePanel.add(otherInfo, c);
 
         c.gridy++;
-        sidePanel.add(Box.createRigidArea(new Dimension(0, GUI_COMP_SPACING/2)), c);
+        sidePanel.add(Box.createRigidArea(new Dimension(0, GUI_COMP_SPACING / 2)), c);
 
         c.gridy++;
         sidePanel.add(infoView, c);
 
         c.gridy++;
-        sidePanel.add(Box.createRigidArea(new Dimension(0, GUI_COMP_SPACING/2)), c);
+        sidePanel.add(Box.createRigidArea(new Dimension(0, GUI_COMP_SPACING / 2)), c);
 
         c.gridy++;
         sidePanel.add(tribeResearchInfo, c);
 
         c.gridy++;
-        sidePanel.add(Box.createRigidArea(new Dimension(0, GUI_COMP_SPACING/2)), c);
+        sidePanel.add(Box.createRigidArea(new Dimension(0, GUI_COMP_SPACING / 2)), c);
 
         c.gridy++;
         JPanel buttons = new JPanel();
         JButton endTurn = new JButton("End Turn");
         endTurn.addActionListener(e -> ac.addAction(new EndTurn(gs.getActiveTribeID()), gs));
         JButton playTurn = new JButton("Play Turn");
-        playTurn.addActionListener(e -> { pauseAfterTurn = true; game.setPaused(false); });
+        playTurn.addActionListener(e -> {
+            pauseAfterTurn = true;
+            game.setPaused(false);
+        });
         JButton playTick = new JButton("Play Tick");
-        playTick.addActionListener(e -> { pauseAfterTick = true; game.setPaused(false); });
+        playTick.addActionListener(e -> {
+            pauseAfterTick = true;
+            game.setPaused(false);
+        });
         JButton pause = new JButton("Pause");
         pause.addActionListener(e -> {
             if (game.isPaused()) {
@@ -346,7 +366,7 @@ public class GUI extends JFrame {
         sidePanel.add(buttons, c);
 
         c.gridy++;
-        sidePanel.add(Box.createRigidArea(new Dimension(0, GUI_COMP_SPACING/2)), c);
+        sidePanel.add(Box.createRigidArea(new Dimension(0, GUI_COMP_SPACING / 2)), c);
 
         return sidePanel;
     }
@@ -354,19 +374,20 @@ public class GUI extends JFrame {
     /**
      * Panel containing functionality for interacting with the framework and getting high-level information, including:
      * - Game setup:
-     *      - Choosing which players should play in the next game TODO
-     *      - Choosing which tribe should be associated with each player in the next game TODO
-     *      - Choosing and editing map for next game (text view) TODO
-     *      - Choosing game seed for next game TODO
-     *      - Start/Restart/End game buttons TODO
+     * - Choosing which players should play in the next game TODO
+     * - Choosing which tribe should be associated with each player in the next game TODO
+     * - Choosing and editing map for next game (text view) TODO
+     * - Choosing game seed for next game TODO
+     * - Start/Restart/End game buttons TODO
      * - Debugging:
-     *      - observability toggle TODO
-     *      - visuals on/off TODO
-     *      - results printout for all games in the same run (if multiple) TODO
-     *      - save game toggle TODO
-     *      - add comments to saved game files TODO
-     *      - action history display TODO
-     *      - change game configuration? TODO
+     * - observability toggle TODO
+     * - visuals on/off TODO
+     * - results printout for all games in the same run (if multiple) TODO
+     * - save game toggle TODO
+     * - add comments to saved game files TODO
+     * - action history display TODO
+     * - change game configuration? TODO
+     *
      * @return
      */
     private JPanel createFrameworkPanel() {
@@ -377,7 +398,6 @@ public class GUI extends JFrame {
         c.weighty = 0;
         return panel;
     }
-
 
     /**
      * Paints the GUI, to be called at every game tick.
@@ -394,14 +414,13 @@ public class GUI extends JFrame {
         if (this.gs == null || this.gs.getActiveTribeID() != gs.getActiveTribeID()) {
             // Tribe change
             infoView.resetHighlight();  // Reset highlights
-            if(Constants.GUI_PAN_TO_TRIBE)
+            if (Constants.GUI_PAN_TO_TRIBE)
                 boardView.setPanToTribe(gs);  // Pan camera to tribe capital
             ac.reset();  // Clear action queue
             otherInfo.setText("");  // Reset info
         }
 
-        if (a != null)
-        {
+        if (a != null) {
             // Display result of Examine action
             if (a.getActionType() == EXAMINE) {
                 lastExamineAction = (Examine) a;
@@ -410,7 +429,7 @@ public class GUI extends JFrame {
             if (a.getActionType() == ATTACK ||
                     a.getActionType() == CONVERT ||
                     a.getActionType() == HEAL_OTHERS) {
-                boardView.paintAction((UnitAction)a);
+                boardView.paintAction((UnitAction) a);
             }
         }
 
@@ -479,7 +498,7 @@ public class GUI extends JFrame {
         tribeView.paint(gs);
         techView.paint(gs);
         infoView.paint(gs);
-        appTurn.setText("Turn: " + gs.getTick() + (game.isPaused()? " [PAUSED]" : ""));
+        appTurn.setText("Turn: " + gs.getTick() + (game.isPaused() ? " [PAUSED]" : ""));
         if (gs.getActiveTribe() != null) {
             activeTribe.setText("Tribe acting: " + gs.getActiveTribe().getName());
             activeTribeInfo.setText("stars: " + gs.getActiveTribe().getStars() + " (+" + gs.getActiveTribe().getMaxProduction(gs) + ")");
@@ -497,26 +516,6 @@ public class GUI extends JFrame {
             }
         }
         repaint();
-    }
-
-    public static Vector2d getActionPosition(GameState gs, Action a) {
-        Vector2d pos = null;
-        if (a.getActionType() == MOVE) {
-            pos = new Vector2d(((Move) a).getDestination().x, ((Move) a).getDestination().y);
-        } else if (a.getActionType() == ATTACK) {
-            Unit target = (Unit) gs.getActor(((Attack) a).getTargetId());
-            pos = target.getPosition();
-        } else if (a.getActionType() == RECOVER) {
-            Unit u = (Unit) gs.getActor(((UnitAction) a).getUnitId());
-            pos = u.getPosition();
-        } else if (a.getActionType() == CAPTURE || a.getActionType() == EXAMINE) {
-            Unit u = (Unit) gs.getActor(((UnitAction) a).getUnitId());
-            pos = new Vector2d(u.getPosition().x-1, u.getPosition().y);
-        } else if (a.getActionType() == CONVERT) {
-            Unit target = (Unit) gs.getActor(((Convert) a).getTargetId());
-            pos = target.getPosition();
-        }
-        return pos;
     }
 
     public boolean isClosed() {

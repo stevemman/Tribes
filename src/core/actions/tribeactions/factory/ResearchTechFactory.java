@@ -24,10 +24,8 @@ public class ResearchTechFactory implements ActionFactory {
 
         //Technically, we can do faster than this (by pruning branches of the
         // tech tree that are not reachable), although this makes the code more general.
-        for(Types.TECHNOLOGY tech : Types.TECHNOLOGY.values())
-        {
-            if(stars >= tech.getCost(numCities, techTree) && techTree.isResearchable(tech))
-            {
+        for (Types.TECHNOLOGY tech : Types.TECHNOLOGY.values()) {
+            if (stars >= tech.getCost(numCities, techTree) && techTree.isResearchable(tech)) {
                 ResearchTech newAction = new ResearchTech(tribe.getTribeId());
                 newAction.setTech(tech);
                 actions.add(newAction);

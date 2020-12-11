@@ -13,8 +13,8 @@ public class ClearForestCommand implements ActionCommand {
 
     @Override
     public boolean execute(Action a, GameState gs) {
-        ClearForest action = (ClearForest)a;
-        if (action.isFeasible(gs)){
+        ClearForest action = (ClearForest) a;
+        if (action.isFeasible(gs)) {
             int cityId = action.getCityId();
             City city = (City) gs.getActor(cityId);
             Vector2d targetPos = action.getTargetPos();

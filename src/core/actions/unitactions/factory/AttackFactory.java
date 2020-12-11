@@ -19,7 +19,7 @@ public class AttackFactory implements ActionFactory {
         LinkedList<Action> attacks = new LinkedList<>();
 
         //Only if unit can attack.
-        if(unit.canAttack()) {
+        if (unit.canAttack()) {
             Board b = gs.getBoard();
             Vector2d position = unit.getPosition();
 

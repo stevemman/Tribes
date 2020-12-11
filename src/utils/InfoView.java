@@ -57,8 +57,7 @@ public class InfoView extends JComponent {
 
     private GameState gs;
 
-    InfoView(ActionController ac)
-    {
+    InfoView(ActionController ac) {
         this.size = new Dimension(GUI_SIDE_PANEL_WIDTH, GUI_INFO_PANEL_HEIGHT);
         this.ac = ac;
         int scrollBarSize = (Integer) UIManager.get("ScrollBar.width");
@@ -74,11 +73,11 @@ public class InfoView extends JComponent {
         textArea.setFont(textFont);
         textArea.setEditable(false);
         textArea.setBackground(Color.lightGray);
-        DefaultCaret caret = (DefaultCaret)textArea.getCaret();
+        DefaultCaret caret = (DefaultCaret) textArea.getCaret();
         caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
 
         JPanel actionPanel = new JPanel();
-        actionPanel.setPreferredSize(new Dimension(GUI_SIDE_PANEL_WIDTH - scrollBarSize*2, GUI_ACTION_PANEL_FULL_SIZE));
+        actionPanel.setPreferredSize(new Dimension(GUI_SIDE_PANEL_WIDTH - scrollBarSize * 2, GUI_ACTION_PANEL_FULL_SIZE));
 
         // Simple actions: BurnForest, ClearForest, Destroy, GrowForest, GatherResource
         actionBF = new JButton("Burn");  // If forest
@@ -169,14 +168,12 @@ public class InfoView extends JComponent {
     }
 
 
-    public void paintComponent(Graphics gx)
-    {
+    public void paintComponent(Graphics gx) {
         Graphics2D g = (Graphics2D) gx;
         paintWithGraphics(g);
     }
 
-    private void paintWithGraphics(Graphics2D g)
-    {
+    private void paintWithGraphics(Graphics2D g) {
         if (gs == null) return;
 
         //For a better graphics, enable this: (be aware this could bring performance issues depending on your HW & OS).
@@ -266,12 +263,12 @@ public class InfoView extends JComponent {
         sb.append("<li><b>Range:</b> " + u.RANGE + "</li>");
         sb.append("<li><b>Status:</b> " + u.getStatus() + "</li>");
 
-        if(u.getType() == Types.UNIT.BOAT)
-            sb.append("<li><b>Land unit:</b> " + ((Boat)u).getBaseLandUnit() + "</li>");
-        else if(u.getType() == Types.UNIT.SHIP)
-            sb.append("<li><b>Land unit:</b> " + ((Ship)u).getBaseLandUnit() + "</li>");
-        else if(u.getType() == Types.UNIT.BATTLESHIP)
-            sb.append("<li><b>Land unit:</b> " + ((Battleship)u).getBaseLandUnit() + "</li>");
+        if (u.getType() == Types.UNIT.BOAT)
+            sb.append("<li><b>Land unit:</b> " + ((Boat) u).getBaseLandUnit() + "</li>");
+        else if (u.getType() == Types.UNIT.SHIP)
+            sb.append("<li><b>Land unit:</b> " + ((Ship) u).getBaseLandUnit() + "</li>");
+        else if (u.getType() == Types.UNIT.BATTLESHIP)
+            sb.append("<li><b>Land unit:</b> " + ((Battleship) u).getBaseLandUnit() + "</li>");
 
         sb.append("</ul>");
         return sb.toString();
@@ -283,7 +280,7 @@ public class InfoView extends JComponent {
         City c = (City) board.getActor(cityID);
 
         StringBuilder sb = new StringBuilder();
-        if(c != null) {
+        if (c != null) {
             sb.append("<h1>" + Types.TRIBE.values()[c.getTribeId()] + " city " + cityID + "</h1>");
 //            sb.append("<table border=\"0\"><tr><td><img width=\"" + CELL_SIZE + "\" src=\"file:" + Types.TERRAIN.CITY.getImageStr() + "\"/></p></td><td>");
             sb.append("<ul>");
@@ -306,7 +303,7 @@ public class InfoView extends JComponent {
 
         if (board.getTribe(board.getActiveTribeID()).getTechTree().isResearched(Types.TECHNOLOGY.ROADS)) {
             ArrayList<Action> acts = gs.getTribeActions();
-            for (Action a: acts) {
+            for (Action a : acts) {
                 if (a.getActionType() == BUILD_ROAD && ((BuildRoad) a).getPosition().equals(position)) {
                     actionRoad.setVisible(true);
                     listenerRoad.update(board.getActiveTribeID(), position, ac, gs);
@@ -449,7 +446,7 @@ public class InfoView extends JComponent {
         }
     }
 
-    private void resetButtonVisibility(){
+    private void resetButtonVisibility() {
         actionBF.setVisible(false);
         actionCF.setVisible(false);
         actionD.setVisible(false);
@@ -460,29 +457,28 @@ public class InfoView extends JComponent {
         actionUpgrade.setVisible(false);
         actionHealOthers.setVisible(false);
         actionDisband.setVisible(false);
-        for (JButton jb: actionB) {
+        for (JButton jb : actionB) {
             jb.setVisible(false);
         }
-        for (JButton jb: actionS) {
+        for (JButton jb : actionS) {
             jb.setVisible(false);
         }
     }
 
-    void paint(GameState gs)
-    {
+    void paint(GameState gs) {
         this.gs = gs;
     }
 
     /**
      * Gets the dimensions of the window.
+     *
      * @return the dimensions of the window.
      */
     public Dimension getPreferredSize() {
         return size;
     }
 
-    public void setHighlight(int x, int y)
-    {
+    public void setHighlight(int x, int y) {
         highlightXprev = highlightX;
         highlightYprev = highlightY;
         highlightX = x;
@@ -509,12 +505,19 @@ public class InfoView extends JComponent {
         repaint();
     }
 
-    public int getHighlightX() {return highlightX;}
-    public int getHighlightY() {return highlightY;}
+    public int getHighlightX() {
+        return highlightX;
+    }
+
+    public int getHighlightY() {
+        return highlightY;
+    }
+
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean clickedTwice() {
         return highlightX != -1 && highlightX == highlightXprev && highlightY == highlightYprev;
     }
+
     public boolean highlightInGridBounds() {
         return highlightX > -1 && highlightY > -1 && highlightX < gridSize && highlightY < gridSize;
     }
@@ -597,8 +600,8 @@ public class InfoView extends JComponent {
                     ((ResourceGathering) a).setResource(resource);
                     break;
                 case "Spawn":
-                    if( e.getSource() instanceof JButton) {
-                        String type = ((JButton)e.getSource()).getText().split(" ")[1];
+                    if (e.getSource() instanceof JButton) {
+                        String type = ((JButton) e.getSource()).getText().split(" ")[1];
                         Types.UNIT uType = Types.UNIT.stringToType(type);
                         a = new Spawn(cityID);
                         ((Spawn) a).setTargetPos(position);
@@ -606,8 +609,8 @@ public class InfoView extends JComponent {
                     }
                     break;
                 case "Build":
-                    if( e.getSource() instanceof JButton) {
-                        String type = ((JButton)e.getSource()).getText().split(" ")[1];
+                    if (e.getSource() instanceof JButton) {
+                        String type = ((JButton) e.getSource()).getText().split(" ")[1];
                         Types.BUILDING bType = Types.BUILDING.stringToType(type);
                         a = new Build(cityID);
                         ((Build) a).setTargetPos(position);
@@ -617,7 +620,7 @@ public class InfoView extends JComponent {
                 case "Research":
                     if (e.getSource() instanceof JButton) {
                         a = new ResearchTech(gs.getActiveTribeID());
-                        ((ResearchTech)a).setTech(tech);
+                        ((ResearchTech) a).setTech(tech);
                     }
                     break;
                 case "HealOthers":
@@ -634,8 +637,8 @@ public class InfoView extends JComponent {
                     if (e.getSource() instanceof JButton) {
                         Unit u = (Unit) gs.getActor(unitID);
                         Types.ACTION actionType = null;
-                        if(u.getType() == Types.UNIT.BOAT) actionType = UPGRADE_BOAT;
-                        if(u.getType() == Types.UNIT.SHIP) actionType = UPGRADE_SHIP;
+                        if (u.getType() == Types.UNIT.BOAT) actionType = UPGRADE_BOAT;
+                        if (u.getType() == Types.UNIT.SHIP) actionType = UPGRADE_SHIP;
                         a = new Upgrade(actionType, unitID);
                     }
                     break;

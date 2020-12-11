@@ -16,7 +16,7 @@ public class RecoverFactory implements ActionFactory {
         Unit unit = (Unit) actor;
         LinkedList<Action> actions = new LinkedList<>();
         Recover newAction = new Recover(unit.getActorId());
-        if(newAction.isFeasible(gs)){
+        if (newAction.isFeasible(gs)) {
             actions.add(newAction);
         }
         return actions;

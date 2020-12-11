@@ -2,37 +2,39 @@ package core.actions.unitactions;
 
 import core.Types;
 import core.actions.Action;
-import core.game.GameState;
 import core.actors.units.Unit;
+import core.game.GameState;
 import utils.Vector2d;
 import utils.graph.PathNode;
 import utils.graph.Pathfinder;
 
 import java.util.ArrayList;
 
-public class Move extends UnitAction
-{
+public class Move extends UnitAction {
     private Vector2d destination;
 
-    public Move(int unitId)
-    {
+    public Move(int unitId) {
         super(Types.ACTION.MOVE);
         super.unitId = unitId;
     }
 
-    public void setDestination(Vector2d destination) {this.destination = destination; }
-    public Vector2d getDestination() { return destination; }
+    public Vector2d getDestination() {
+        return destination;
+    }
+
+    public void setDestination(Vector2d destination) {
+        this.destination = destination;
+    }
 
     @Override
-    public boolean isFeasible(final GameState gs)
-    {
+    public boolean isFeasible(final GameState gs) {
         Unit unit = (Unit) gs.getActor(this.unitId);
-        if(unit == null)
+        if (unit == null)
             return false;
         Pathfinder tp = new Pathfinder(unit.getPosition(), new StepMove(gs, unit));
 
         //If the unit can move and the destination is vacant, try to reach it.
-        if(unit.canMove() && gs.getBoard().getUnitAt(destination.x, destination.y) == null) {
+        if (unit.canMove() && gs.getBoard().getUnitAt(destination.x, destination.y) == null) {
             ArrayList<PathNode> path = tp.findPathTo(destination);
 //            if(path == null)
 //            {
@@ -51,8 +53,7 @@ public class Move extends UnitAction
         return move;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return "MOVE by unit " + this.unitId + " to " + destination;
     }
 

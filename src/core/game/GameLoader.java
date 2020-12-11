@@ -10,26 +10,26 @@ import core.actors.units.Unit;
 import org.json.JSONObject;
 import utils.Vector2d;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.Iterator;
 
-public class GameLoader
-{
+public class GameLoader {
 
-    private int tick;
-    private long seed;
-    private boolean gameIsOver;
-    private int activeTribeID;
+    private final int tick;
+    private final long seed;
+    private final boolean gameIsOver;
+    private final int activeTribeID;
 
-    private JSONObject JBoard;
-    private JSONObject JTribe;
-    private JSONObject JUnit;
-    private JSONObject JCity;
+    private final JSONObject JBoard;
+    private final JSONObject JTribe;
+    private final JSONObject JUnit;
+    private final JSONObject JCity;
 
     private Board board;
     private Tribe[] tribes;
     private int[] allCapitalIds;
-    private Types.GAME_MODE game_mode;
+    private final Types.GAME_MODE game_mode;
 
     GameLoader(String fileName) {
 
@@ -56,12 +56,12 @@ public class GameLoader
 
     }
 
-    private void loadTribes(){
+    private void loadTribes() {
         Iterator<String> keys = JTribe.keys();
         tribes = new Tribe[JTribe.length()];
         allCapitalIds = new int[JTribe.length()];
         int index = 0;
-        while (keys.hasNext()){
+        while (keys.hasNext()) {
             String key = keys.next();
             JSONObject tribeINFO = JTribe.getJSONObject(key);
             tribes[index] = new Tribe(Integer.parseInt(key), tribeINFO);
@@ -74,31 +74,31 @@ public class GameLoader
         board = new Board(JBoard, allCapitalIds, activeTribeID, tribes);
     }
 
-    private void loadUnits(){
+    private void loadUnits() {
         Iterator<String> keys = JUnit.keys();
-        while (keys.hasNext()){
+        while (keys.hasNext()) {
             String key = keys.next();
             JSONObject unitINFO = JUnit.getJSONObject(key);
             Types.UNIT unitType = Types.UNIT.getTypeByKey(unitINFO.getInt("type"));
-            Unit unit = Types.UNIT.createUnit(new Vector2d(unitINFO.getInt("x"),unitINFO.getInt("y")),
+            Unit unit = Types.UNIT.createUnit(new Vector2d(unitINFO.getInt("x"), unitINFO.getInt("y")),
                     unitINFO.getInt("kill"), unitINFO.getBoolean("isVeteran"),
                     unitINFO.getInt("cityID"), unitINFO.getInt("tribeId"), unitType);
             unit.setCurrentHP(unitINFO.getInt("currentHP"));
             unit.setStatus(Types.TURN_STATUS.FRESH);
-            if (unitType == Types.UNIT.BOAT){
-                ((Boat)unit).setBaseLandUnit(Types.UNIT.getTypeByKey(unitINFO.getInt("baseLandType")));
-            }else if (unitType == Types.UNIT.SHIP){
-                ((Ship)unit).setBaseLandUnit(Types.UNIT.getTypeByKey(unitINFO.getInt("baseLandType")));
-            }else if (unitType == Types.UNIT.BATTLESHIP){
-                ((Battleship)unit).setBaseLandUnit(Types.UNIT.getTypeByKey(unitINFO.getInt("baseLandType")));
+            if (unitType == Types.UNIT.BOAT) {
+                ((Boat) unit).setBaseLandUnit(Types.UNIT.getTypeByKey(unitINFO.getInt("baseLandType")));
+            } else if (unitType == Types.UNIT.SHIP) {
+                ((Ship) unit).setBaseLandUnit(Types.UNIT.getTypeByKey(unitINFO.getInt("baseLandType")));
+            } else if (unitType == Types.UNIT.BATTLESHIP) {
+                ((Battleship) unit).setBaseLandUnit(Types.UNIT.getTypeByKey(unitINFO.getInt("baseLandType")));
             }
             board.addActor(unit, Integer.parseInt(key));
         }
     }
 
-    private void loadCities(){
+    private void loadCities() {
         Iterator<String> keys = JCity.keys();
-        while (keys.hasNext()){
+        while (keys.hasNext()) {
             String key = keys.next();
             JSONObject cityINFO = JCity.getJSONObject(key);
             City city = new City(cityINFO, Integer.parseInt(key));
@@ -117,7 +117,7 @@ public class GameLoader
                 line = br.readLine();
             }
             result = sb.toString();
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return result;

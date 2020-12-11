@@ -17,11 +17,10 @@ public class BurnForestFactory implements ActionFactory {
         LinkedList<Action> actions = new LinkedList<>();
         City city = (City) actor;
         LinkedList<Vector2d> tiles = gs.getBoard().getCityTiles(city.getActorId());
-        for(Vector2d tile: tiles){
+        for (Vector2d tile : tiles) {
             BurnForest action = new BurnForest(city.getActorId());
             action.setTargetPos(new Vector2d(tile.x, tile.y));
-            if(action.isFeasible(gs))
-            {
+            if (action.isFeasible(gs)) {
                 actions.add(action);
             }
         }

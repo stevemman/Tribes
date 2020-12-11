@@ -5,8 +5,7 @@ import utils.Vector2d;
 
 import static core.TribesConfig.*;
 
-public class Boat extends Unit
-{
+public class Boat extends Unit {
     private Types.UNIT baseLandUnit;
 
     public Boat(Vector2d pos, int kills, boolean isVeteran, int cityId, int tribeId) {

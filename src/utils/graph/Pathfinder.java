@@ -9,28 +9,23 @@ import java.util.PriorityQueue;
 /**
  * Created by dperez on 13/01/16.
  */
-public class Pathfinder
-{
+public class Pathfinder {
     public PathNode root;
-    private NeighbourHelper provider;
-
     public HashSet<PathNode> nodes;
+    private final NeighbourHelper provider;
 
-    public Pathfinder(Vector2d rootPos, NeighbourHelper provider)
-    {
+    public Pathfinder(Vector2d rootPos, NeighbourHelper provider) {
         root = new PathNode(rootPos);
         this.provider = provider;
     }
 
 
-    private ArrayList<PathNode> calculatePath(PathNode node)
-    {
+    private ArrayList<PathNode> calculatePath(PathNode node) {
         ArrayList<PathNode> path = new ArrayList<>();
-        while(node != null)
-        {
-            if(node.getParent() != null) //to avoid adding the start node.
+        while (node != null) {
+            if (node.getParent() != null) //to avoid adding the start node.
             {
-                path.add(0,node);
+                path.add(0, node);
             }
             node = node.getParent();
         }
@@ -38,20 +33,17 @@ public class Pathfinder
     }
 
     //Dijkstraa to all possible destinations. Returns nodes of all destinations.
-    public ArrayList<PathNode> findPaths()
-    {
+    public ArrayList<PathNode> findPaths() {
         return _dijkstra();
     }
 
     //A* to destination
-    public ArrayList<PathNode> findPathTo(Vector2d goalPosition)
-    {
+    public ArrayList<PathNode> findPathTo(Vector2d goalPosition) {
         return _findPath(new PathNode(goalPosition));
     }
 
 
-    private ArrayList<PathNode> _dijkstra()
-    {
+    private ArrayList<PathNode> _dijkstra() {
         nodes = new HashSet<>();
 
         root.setVisited(true);
@@ -66,14 +58,12 @@ public class Pathfinder
         openList.add(root);
         nodes.add(root);
 
-        while (openList.size() != 0)
-        {
+        while (openList.size() != 0) {
             node = openList.poll();
             //nodes.add(node);
 //            System.out.println("Remaining in list: " + openList.size());
 
-            if (!destinationsFromStart.contains(node) && (node != root))
-            {
+            if (!destinationsFromStart.contains(node) && (node != root)) {
                 destinationsFromStart.add(node);
             }
 
@@ -112,8 +102,7 @@ public class Pathfinder
         return destinationsFromStart;
     }
 
-    private ArrayList<PathNode> _findPath(PathNode goal)
-    {
+    private ArrayList<PathNode> _findPath(PathNode goal) {
         // TODO this method repeats calculations that are already done in _dijsktra above, could be made a lot more
         // efficient to avoid re-calculating neighbours
 
@@ -128,13 +117,12 @@ public class Pathfinder
         openList.add(root);
         nodes.add(root);
 
-        while(openList.size() != 0)
-        {
+        while (openList.size() != 0) {
             node = openList.poll();
             //nodes.add(node);
             closedList.add(node);
 
-            if(node.getX() == goal.getX() && node.getY() == goal.getY())
+            if (node.getX() == goal.getX() && node.getY() == goal.getY())
                 return calculatePath(node);
 
             ArrayList<PathNode> neighbours = provider.getNeighbours(node.getPosition(), node.getTotalCost());
@@ -182,14 +170,12 @@ public class Pathfinder
 
         }
 
-        if(node == null || node.getX() != goal.getX() || node.getY() != goal.getY()) //not the goal
+        if (node == null || node.getX() != goal.getX() || node.getY() != goal.getY()) //not the goal
             return null;
 
         return calculatePath(node);
 
     }
-
-
 
 
 //    public void printPath(int pathId, ArrayList<Node> nodes)

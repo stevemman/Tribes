@@ -8,15 +8,12 @@ import core.actors.Tribe;
 import core.game.GameState;
 import utils.Vector2d;
 
-import java.util.Vector;
-
 public class BuildRoadCommand implements ActionCommand {
 
     @Override
     public boolean execute(Action a, GameState gs) {
-        BuildRoad action = (BuildRoad)a;
-        if(action.isFeasible(gs))
-        {
+        BuildRoad action = (BuildRoad) a;
+        if (action.isFeasible(gs)) {
             int tribeId = action.getTribeId();
             Vector2d position = action.getPosition();
             Tribe tribe = gs.getTribe(tribeId);

@@ -15,7 +15,7 @@ public class EndTurnFactory implements ActionFactory {
     public LinkedList<Action> computeActionVariants(final Actor actor, final GameState gs) {
         Tribe tribe = (Tribe) actor;
         LinkedList<Action> endTurns = new LinkedList<>();
-        if(gs.canEndTurn(tribe.getTribeId()))
+        if (gs.canEndTurn(tribe.getTribeId()))
             endTurns.add(new EndTurn(tribe.getActorId()));
         return endTurns;
     }

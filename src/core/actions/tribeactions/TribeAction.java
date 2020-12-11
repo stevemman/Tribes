@@ -1,18 +1,24 @@
 package core.actions.tribeactions;
+
 import core.Types;
 import core.actions.Action;
 import core.game.GameState;
 
 public class TribeAction extends Action {
 
-    TribeAction(Types.ACTION aType)
-    {
+    protected int tribeId;
+
+    TribeAction(Types.ACTION aType) {
         this.actionType = aType;
     }
 
-    protected int tribeId;
-    public void setTribeId(int tribeId) {this.tribeId = tribeId;}
-    public int getTribeId() {return this.tribeId;}
+    public int getTribeId() {
+        return this.tribeId;
+    }
+
+    public void setTribeId(int tribeId) {
+        this.tribeId = tribeId;
+    }
 
     @Override
     public boolean isFeasible(GameState gs) {

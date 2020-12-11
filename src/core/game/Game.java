@@ -4,16 +4,22 @@ import core.Constants;
 import core.Types;
 import core.actions.Action;
 import core.actions.tribeactions.EndTurn;
-import core.actions.unitactions.Attack;
 import core.actors.Tribe;
 import players.Agent;
 import players.HumanAgent;
-import utils.*;
+import utils.AIStats;
+import utils.ElapsedCpuTimer;
+import utils.GUI;
+import utils.WindowInput;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
+import java.util.TreeSet;
 
 import static core.Constants.*;
-import static core.Types.ACTION.*;
+import static core.Types.ACTION.ATTACK;
+import static core.Types.ACTION.END_TURN;
 
 public class Game {
 
@@ -44,20 +50,21 @@ public class Game {
     /**
      * Constructor of the game
      */
-    public  Game()
-    {}
+    public Game() {
+    }
 
     /**
      * Initializes the game. This method does the following:
-     *   Sets the players of the game, the number of players and their IDs
-     *   Initializes the array to hold the player game states.
-     *   Assigns the tribes that will play the game.
-     *   Creates the level reading it from the file 'filename'.
-     *   Resets the game so it's ready to start.
-     *   Turn order: by default, turns run following the order in the tribes array.
-     * @param players Players of the game.
+     * Sets the players of the game, the number of players and their IDs
+     * Initializes the array to hold the player game states.
+     * Assigns the tribes that will play the game.
+     * Creates the level reading it from the file 'filename'.
+     * Resets the game so it's ready to start.
+     * Turn order: by default, turns run following the order in the tribes array.
+     *
+     * @param players  Players of the game.
      * @param filename Name of the file with the level information.
-     * @param seed Seed for the game (used only for board generation)
+     * @param seed     Seed for the game (used only for board generation)
      * @param gameMode Game Mode for this game.
      */
     public void init(ArrayList<Agent> players, String filename, long seed, Types.GAME_MODE gameMode) {
@@ -74,17 +81,18 @@ public class Game {
 
     /**
      * Initializes the game. This method does the following:
-     *   Sets the players of the game, the number of players and their IDs
-     *   Initializes the array to hold the player game states.
-     *   Assigns the tribes that will play the game
-     *   Generates a new level using the seed levelgen_seed
-     *   Resets the game so it's ready to start.
-     *   Turn order: by default, turns run following the order in the tribes array.
-     * @param players Players of the game.
+     * Sets the players of the game, the number of players and their IDs
+     * Initializes the array to hold the player game states.
+     * Assigns the tribes that will play the game
+     * Generates a new level using the seed levelgen_seed
+     * Resets the game so it's ready to start.
+     * Turn order: by default, turns run following the order in the tribes array.
+     *
+     * @param players       Players of the game.
      * @param levelgen_seed Seed for the level generator.
-     * @param tribes Array of tribe types to play with.
-     * @param seed Seed for the game (used only for board generation)
-     * @param gameMode Game Mode for this game.
+     * @param tribes        Array of tribe types to play with.
+     * @param seed          Seed for the game (used only for board generation)
+     * @param gameMode      Game Mode for this game.
      */
     public void init(ArrayList<Agent> players, long levelgen_seed, Types.TRIBE[] tribes, long seed, Types.GAME_MODE gameMode) {
 
@@ -100,10 +108,11 @@ public class Game {
 
     /**
      * Initializes the game from a savegame file
-     * @param players Players who will play this game.
+     *
+     * @param players  Players who will play this game.
      * @param fileName savegame
      */
-    public void init(ArrayList<Agent> players, String fileName){
+    public void init(ArrayList<Agent> players, String fileName) {
 
         GameLoader gameLoader = new GameLoader(fileName);
         this.seed = gameLoader.getSeed();
@@ -117,13 +126,12 @@ public class Game {
 
     /**
      * Initializes game structures depending on number of players and tribes
+     *
      * @param players Players to play this game
      * @param nTribes number of tribes the game is set up to start with. Should be the same as players.size().
      */
-    private void initGameStructures(ArrayList<Agent> players, int nTribes)
-    {
-        if(players.size() != nTribes)
-        {
+    private void initGameStructures(ArrayList<Agent> players, int nTribes) {
+        if (players.size() != nTribes) {
             System.out.println("ERROR: Number of tribes must _equal_ the number of players. There are " +
                     players.size() + " players for " + nTribes + " tribes in this level.");
             System.exit(-1);
@@ -135,11 +143,10 @@ public class Game {
         this.aiStats = new AIStats[numPlayers];
 
         ArrayList<Integer> allIds = new ArrayList<>();
-        for(int i = 0; i < numPlayers; ++i)
+        for (int i = 0; i < numPlayers; ++i)
             allIds.add(i);
 
-        for(int i = 0; i < numPlayers; ++i)
-        {
+        for (int i = 0; i < numPlayers; ++i) {
             this.players[i] = players.get(i);
             this.players[i].setPlayerIDs(i, allIds);
             this.aiStats[i] = new AIStats(i);
@@ -151,8 +158,9 @@ public class Game {
 
     /**
      * Initializes game structures depending on number of players and tribes
+     *
      * @param players Players to play this game
-     * @param tribes Array of tribe types to play with.
+     * @param tribes  Array of tribe types to play with.
      */
     private void initGameStructures(ArrayList<Agent> players, Types.TRIBE[] tribes) {
         int nTribes = tribes.length;
@@ -169,15 +177,13 @@ public class Game {
 
         Tribe[] tribeObjects = gs.getTribes();
 
-        for(int tribeIdx = 0; tribeIdx < tribeObjects.length; ++tribeIdx)
-        {
+        for (int tribeIdx = 0; tribeIdx < tribeObjects.length; ++tribeIdx) {
             Tribe thisTribe = tribeObjects[tribeIdx];
             core.Types.TRIBE tribeType = thisTribe.getType();
 
             ArrayList<Integer> allIds = new ArrayList<>();
             int indexInTypes = -1;
-            for(int i = 0; i < tribes.length; ++i)
-            {
+            for (int i = 0; i < tribes.length; ++i) {
                 allIds.add(i);
                 if (tribes[i] == tribeType)
                     indexInTypes = i;
@@ -192,17 +198,17 @@ public class Game {
 
     /**
      * Runs a game once. Receives frame and window input. If any is null, forces a run with no visuals.
+     *
      * @param frame window to draw the game
-     * @param wi input for the window.
+     * @param wi    input for the window.
      */
-    public void run(GUI frame, WindowInput wi)
-    {
+    public void run(GUI frame, WindowInput wi) {
         if (frame == null || wi == null)
             VISUALS = false;
 
         boolean firstEnd = true;
 
-        while(frame == null || !frame.isClosed()) {
+        while (frame == null || !frame.isClosed()) {
 //            System.out.println("Frame closed: " + frame.isClosed());
             // Loop while window is still open, even if the game ended.
             // If not playing with visuals, loop is broken when game's ended.
@@ -215,11 +221,9 @@ public class Game {
                 firstEnd = false;
 
                 printGameResults();
-                if(VERBOSE)
-                {
+                if (VERBOSE) {
                     TreeSet<TribeResult> ranking = getCurrentRanking();
-                    for(TribeResult tr : ranking)
-                    {
+                    for (TribeResult tr : ranking) {
                         int idx = tr.getId();
                         AIStats ais = aiStats[idx];
                         ais.print();
@@ -241,16 +245,17 @@ public class Game {
 
     /**
      * Ticks the game forward. Asks agents for actions and applies returned actions to obtain the next game state.
+     *
      * @param frame GUI of the game
      */
-    private void tick (GUI frame) {
+    private void tick(GUI frame) {
 
 //        System.out.println("Tick: " + gs.getTick());
         Tribe[] tribes = gs.getTribes();
         for (int i = 0; i < numPlayers; i++) {
             Tribe tribe = tribes[i];
 
-            if(tribe.getWinner() != Types.RESULT.INCOMPLETE)
+            if (tribe.getWinner() != Types.RESULT.INCOMPLETE)
                 continue; //We don't do anything for tribes that have already finished.
 
 
@@ -258,12 +263,11 @@ public class Game {
             processTurn(i, tribe, frame);
 
             // Save Game
-            if(Constants.WRITE_SAVEGAMES)
+            if (Constants.WRITE_SAVEGAMES)
                 GameSaver.writeTurnFile(gs, getBoard(), seed);
 
             //it may be that this player won the game, no more playing.
-            if(gameOver())
-            {
+            if (gameOver()) {
                 return;
             }
 
@@ -287,11 +291,11 @@ public class Game {
     /**
      * Process a turn for a given player. It queries the player for an action until no more
      * actions are available or the player returns a EndTurnAction action.
+     *
      * @param playerID ID of the player whose turn is being processed.
-     * @param tribe tribe that corresponds to this player.
+     * @param tribe    tribe that corresponds to this player.
      */
-    private void processTurn(int playerID, Tribe tribe, GUI frame)
-    {
+    private void processTurn(int playerID, Tribe tribe, GUI frame) {
         //Init the turn for this tribe (stars, unit reset, etc).
         gs.initTurn(tribe);
 
@@ -339,7 +343,7 @@ public class Game {
                         action = ag.act(gameStateObservations[playerID], ect);
                         remainingECT = ect.remainingTimeMillis(); // Note down the remaining time to use it for the next iteration
 
-                        if(!isHumanPlayer)
+                        if (!isHumanPlayer)
                             updateBranchingFactor(aiStats[playerID], gs.getTick(), gameStateObservations[playerID]);
 
 
@@ -398,8 +402,7 @@ public class Game {
                 updateAssignedGameStates();
             }
 
-            if(gameOver())
-            {
+            if (gameOver()) {
                 break;
             }
         }
@@ -411,8 +414,7 @@ public class Game {
     /**
      * Prints the results of the game.
      */
-    private void printGameResults()
-    {
+    private void printGameResults() {
         Types.RESULT[] results = getWinnerStatus();
         int[] sc = getScores();
         Tribe[] tribes = gs.getBoard().getTribes();
@@ -420,12 +422,11 @@ public class Game {
         TreeSet<TribeResult> ranking = gs.getCurrentRanking();
         System.out.println(gs.getTick() + "; Game Results: ");
         int rank = 1;
-        for(TribeResult tr : ranking)
-        {
+        for (TribeResult tr : ranking) {
             int tribeId = tr.getId();
             Agent ag = players[tribeId];
             String[] agentChunks = ag.getClass().toString().split("\\.");
-            String agentName = agentChunks[agentChunks.length-1];
+            String agentName = agentChunks[agentChunks.length - 1];
 
             System.out.print(" #" + rank + ": Tribe " + tribes[tribeId].getType() + " (" + agentName + "): " + results[tribeId] + ", " + sc[tribeId] + " points;");
             System.out.println(" #tech: " + tr.getNumTechsResearched() + ", #cities: " + tr.getNumCities() + ", production: " + tr.getProduction());
@@ -448,8 +449,7 @@ public class Game {
         }
     }
 
-    private void updateBranchingFactor(AIStats aiStats, int turn, GameState currentGameState)
-    {
+    private void updateBranchingFactor(AIStats aiStats, int turn, GameState currentGameState) {
         ArrayList<Integer> actionCounts = new ArrayList<>();
 
         HashMap<Integer, ArrayList<Action>> cityActions = currentGameState.getCityActions();
@@ -470,10 +470,10 @@ public class Game {
 
     /**
      * Returns the winning status of all players.
+     *
      * @return the winning status of all players.
      */
-    public Types.RESULT[] getWinnerStatus()
-    {
+    public Types.RESULT[] getWinnerStatus() {
         //Build the results array
         Tribe[] tribes = gs.getTribes();
         Types.RESULT[] results = new Types.RESULT[numPlayers];
@@ -486,10 +486,10 @@ public class Game {
 
     /**
      * Returns the current scores of all players.
+     *
      * @return the current scores of all players.
      */
-    public int[] getScores()
-    {
+    public int[] getScores() {
         //Build the results array
         Tribe[] tribes = gs.getTribes();
         int[] scores = new int[numPlayers];
@@ -514,6 +514,7 @@ public class Game {
     /**
      * Returns the game state as seen for the player with the index playerIdx. This game state
      * includes only the observations that are visible if partial observability is enabled.
+     *
      * @param playerIdx index of the player for which the game state is generated.
      * @return the game state.
      */
@@ -523,10 +524,10 @@ public class Game {
 
     /**
      * Returns the game board.
+     *
      * @return the game board.
      */
-    public Board getBoard()
-    {
+    public Board getBoard() {
         return gs.getBoard();
     }
 
@@ -537,6 +538,7 @@ public class Game {
     /**
      * Method to identify the end of the game. If the game is over, the winner is decided.
      * The winner of a game is determined by TribesConfig.GAME_MODE and TribesConfig.MAX_TURNS
+     *
      * @return true if the game has ended, false otherwise.
      */
     boolean gameOver() {
@@ -546,12 +548,13 @@ public class Game {
     public void setAnimationPaused(boolean p) {
         animationPaused = p;
     }
-    public void setPaused(boolean p) {
-        paused = p;
-    }
 
     public boolean isPaused() {
         return paused;
+    }
+
+    public void setPaused(boolean p) {
+        paused = p;
     }
 
     public TreeSet<TribeResult> getCurrentRanking() {

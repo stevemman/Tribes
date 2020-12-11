@@ -14,13 +14,12 @@ import core.game.Board;
 import core.game.GameState;
 
 import static core.Types.UNIT.*;
-import static core.Types.UNIT.SHIP;
 
 public class UpgradeCommand implements ActionCommand {
 
     @Override
     public boolean execute(Action a, GameState gs) {
-        Upgrade action = (Upgrade)a;
+        Upgrade action = (Upgrade) a;
         int unitId = action.getUnitId();
 
         Unit unit = (Unit) gs.getActor(unitId);
@@ -28,23 +27,23 @@ public class UpgradeCommand implements ActionCommand {
         Board board = gs.getBoard();
         City city = (City) board.getActor(unit.getCityId());
 
-        if(action.isFeasible(gs)){
+        if (action.isFeasible(gs)) {
             Types.UNIT unitType = unit.getType();
             Types.UNIT nextType;
 
             //get the correct type - or nothing!
-            if(unitType == BOAT) nextType = SHIP;
-            else if(unitType == SHIP) nextType = BATTLESHIP;
+            if (unitType == BOAT) nextType = SHIP;
+            else if (unitType == SHIP) nextType = BATTLESHIP;
             else return false; //this shouldn't happen, isFeasible should've captured this case
 
             //Create the new unit
             Unit newUnit = Types.UNIT.createUnit(unit.getPosition(), unit.getKills(), unit.isVeteran(), unit.getCityId(), unit.getTribeId(), nextType);
             newUnit.setCurrentHP(unit.getCurrentHP());
             newUnit.setMaxHP(unit.getMaxHP());
-            if(nextType == SHIP)
-                ((Ship)newUnit).setBaseLandUnit(((Boat)unit).getBaseLandUnit());
+            if (nextType == SHIP)
+                ((Ship) newUnit).setBaseLandUnit(((Boat) unit).getBaseLandUnit());
             else
-                ((Battleship)newUnit).setBaseLandUnit(((Ship)unit).getBaseLandUnit());
+                ((Battleship) newUnit).setBaseLandUnit(((Ship) unit).getBaseLandUnit());
 
             //adjustments in tribe and board.
             tribe.subtractStars(nextType.getCost());

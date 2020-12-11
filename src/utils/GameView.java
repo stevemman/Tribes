@@ -1,13 +1,12 @@
 package utils;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.*;
-
 import core.Types;
+import core.actions.Action;
 import core.actions.cityactions.CityAction;
-import core.actions.cityactions.ResourceGathering;
-import core.actions.unitactions.*;
+import core.actions.unitactions.Attack;
+import core.actions.unitactions.Convert;
+import core.actions.unitactions.HealOthers;
+import core.actions.unitactions.UnitAction;
 import core.actions.unitactions.command.AttackCommand;
 import core.actors.Actor;
 import core.actors.City;
@@ -18,65 +17,65 @@ import core.actors.units.Unit;
 import core.game.Board;
 import core.game.Game;
 import core.game.GameState;
-import core.actions.Action;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 import static core.Constants.*;
+import static core.Types.ACTION.*;
 import static core.Types.TERRAIN.*;
 import static core.Types.UNIT.*;
-import static core.Types.ACTION.*;
 import static utils.Vector2d.manhattanDistance;
 
 @SuppressWarnings({"SuspiciousNameCombination", "unchecked"})
 public class GameView extends JComponent {
 
-    static int gridSize;
-    private Game game;
-    private Board board; //This only counts terrains. Needs to be enhanced with actors, resources, etc.
-    private GameState gameState;
-//    private Image backgroundImg;
-    private Image fogImg, shineImg;
-    private InfoView infoView;
-    private Vector2d panTranslate;  // Used to translate all coordinates for objects drawn on screen
-
-    private Color progressColor = new Color(53, 183, 255);
-    private Color negativeColor = new Color(255, 63, 73);
-    private Image starImg, starShadow, capitalImg, capitalShadow, cityWalls; // road;
-    private Image roadVhalf, roadDhalf;
-
-    boolean[][] actionable;
-
-    // Action animations
-    private ArrayList<Pair<Pair<Image, Vector2d>,Pair<Image, Vector2d>>> sourceTargetAnimationInfo;
-    private ArrayList<Double> animationSpeed;
-    private ArrayList<Pair<Integer, Integer>> actionAnimationUnitsTribe;
-    private UnitAction animatedAction;
-
-    private Image[] explosionEffect, pierceEffect;
-    private Image[][] slashEffect, healEffect, convertEffect;  // Different per tribe
-    private int effectDrawingIdx = -1, effectTribeIdx;
-    private ArrayList<Vector2d> effectPositions;
-    private EFFECT effectType;  // What effect are we drawing?
-    int delay = 5;
-    final int nTilesExplosion = 12;
-    final int nTilesEffect = 6;
-    final int nTilesPierce = 3;
-
-    enum EFFECT{
-        EXPLOSION,
-        SLASH,
-        HEAL,
-        CONVERT,
-        PIERCE
-    }
-
     /**
      * Dimensions of the window.
      */
     public static Dimension dimension;
-    private static double isometricAngle = -45;
-
-    GameView(Game game, InfoView inforView, Vector2d panTranslate)
-    {
+    static int gridSize;
+    private static final double isometricAngle = -45;
+    final int nTilesExplosion = 12;
+    final int nTilesEffect = 6;
+    final int nTilesPierce = 3;
+    boolean[][] actionable;
+    int delay = 5;
+    private final Game game;
+    private Board board; //This only counts terrains. Needs to be enhanced with actors, resources, etc.
+    private GameState gameState;
+    //    private Image backgroundImg;
+    private final Image fogImg;
+    private final Image shineImg;
+    private final InfoView infoView;
+    private Vector2d panTranslate;  // Used to translate all coordinates for objects drawn on screen
+    private final Color progressColor = new Color(53, 183, 255);
+    private final Color negativeColor = new Color(255, 63, 73);
+    private final Image starImg;
+    private final Image starShadow;
+    private final Image capitalImg;
+    private final Image capitalShadow;
+    private final Image cityWalls; // road;
+    private final Image roadVhalf;
+    private final Image roadDhalf;
+    // Action animations
+    private final ArrayList<Pair<Pair<Image, Vector2d>, Pair<Image, Vector2d>>> sourceTargetAnimationInfo;
+    private final ArrayList<Double> animationSpeed;
+    private final ArrayList<Pair<Integer, Integer>> actionAnimationUnitsTribe;
+    private UnitAction animatedAction;
+    private final Image[] explosionEffect;
+    private final Image[] pierceEffect;
+    private final Image[][] slashEffect;
+    private final Image[][] healEffect;
+    private final Image[][] convertEffect;  // Different per tribe
+    private int effectDrawingIdx = -1, effectTribeIdx;
+    private final ArrayList<Vector2d> effectPositions;
+    private EFFECT effectType;  // What effect are we drawing?
+    GameView(Game game, InfoView inforView, Vector2d panTranslate) {
         this.game = game;
         this.board = game.getBoard().copy();
         this.infoView = inforView;
@@ -105,12 +104,12 @@ public class GameView extends JComponent {
         pierceEffect = new Image[pierceLength];
         for (int i = 0; i < nTilesExplosion; i++) {
             for (int j = 0; j < delay; j++) {
-                explosionEffect[i*delay+j] = ImageIO.GetInstance().getImage("img/weapons/effects/explosion/tile" + String.format("%03d", i) + ".png");
+                explosionEffect[i * delay + j] = ImageIO.GetInstance().getImage("img/weapons/effects/explosion/tile" + String.format("%03d", i) + ".png");
             }
         }
         for (int i = 0; i < nTilesPierce; i++) {
             for (int j = 0; j < delay; j++) {
-                pierceEffect[i*delay+j] = ImageIO.GetInstance().getImage("img/weapons/effects/pierce/tile" + String.format("%03d", i) + ".png");
+                pierceEffect[i * delay + j] = ImageIO.GetInstance().getImage("img/weapons/effects/pierce/tile" + String.format("%03d", i) + ".png");
             }
         }
         int nPlayers = game.getPlayers().length;
@@ -119,14 +118,14 @@ public class GameView extends JComponent {
         convertEffect = new Image[nPlayers][];
         int effLength = nTilesEffect * delay;
         for (int j = 0; j < nPlayers; j++) {
-            slashEffect[j%nPlayers] = new Image[effLength];
-            healEffect[j%nPlayers] = new Image[effLength];
-            convertEffect[j%nPlayers] = new Image[effLength];
+            slashEffect[j % nPlayers] = new Image[effLength];
+            healEffect[j % nPlayers] = new Image[effLength];
+            convertEffect[j % nPlayers] = new Image[effLength];
             for (int i = 0; i < nTilesEffect; i++) {
                 for (int k = 0; k < delay; k++) {
-                    slashEffect[j % nPlayers][i*delay + k] = ImageIO.GetInstance().getImage("img/weapons/effects/slash/" + j + "/tile" + String.format("%03d", i) + ".png");
-                    healEffect[j % nPlayers][i*delay + k] = ImageIO.GetInstance().getImage("img/weapons/effects/heal/" + j + "/tile" + String.format("%03d", i) + ".png");
-                    convertEffect[j % nPlayers][i*delay + k] = ImageIO.GetInstance().getImage("img/weapons/effects/convert/" + j + "/tile" + String.format("%03d", i) + ".png");
+                    slashEffect[j % nPlayers][i * delay + k] = ImageIO.GetInstance().getImage("img/weapons/effects/slash/" + j + "/tile" + String.format("%03d", i) + ".png");
+                    healEffect[j % nPlayers][i * delay + k] = ImageIO.GetInstance().getImage("img/weapons/effects/heal/" + j + "/tile" + String.format("%03d", i) + ".png");
+                    convertEffect[j % nPlayers][i * delay + k] = ImageIO.GetInstance().getImage("img/weapons/effects/convert/" + j + "/tile" + String.format("%03d", i) + ".png");
                 }
             }
         }
@@ -137,16 +136,88 @@ public class GameView extends JComponent {
         effectPositions = new ArrayList<>();
     }
 
+    private static void paintImageRotated(Graphics2D gphx, int x, int y, Image img, int imgSize, Vector2d panTranslate) {
+        if (img != null) {
+            int w = img.getWidth(null);
+            int h = img.getHeight(null);
+            float scaleX = (float) imgSize / w;
+            float scaleY = (float) imgSize / h;
 
-    public void paintComponent(Graphics gx)
-    {
+            Graphics2D g2 = (Graphics2D) gphx.create();
+            g2.translate(panTranslate.x, panTranslate.y + dimension.width / 2.0);
+            g2.rotate(Math.toRadians(isometricAngle));
+            g2.drawImage(img, (int) (x + CELL_SIZE / 2.0 - imgSize / 2.0),
+                    (int) (y + CELL_SIZE / 2.0 - imgSize / 2.0),
+                    (int) (w * scaleX), (int) (h * scaleY), null);
+            g2.dispose();
+        }
+    }
+
+    private static void paintImageRotated(Graphics2D gphx, int x, int y, Image img, int imgSize, Vector2d panTranslate,
+                                          double angle, int xAnchor, int yAnchor) {
+        if (img != null) {
+            int w = img.getWidth(null);
+            int h = img.getHeight(null);
+            float scaleX = (float) imgSize / w;
+            float scaleY = (float) imgSize / h;
+
+            Graphics2D g2 = (Graphics2D) gphx.create();
+            g2.translate(panTranslate.x, panTranslate.y);
+            g2.rotate(angle, xAnchor, yAnchor);
+            g2.drawImage(img, x, y, (int) (w * scaleX), (int) (h * scaleY), null);
+            g2.dispose();
+        }
+    }
+
+    private static void paintImage(Graphics2D gphx, int x, int y, Image img, int imgSize, Vector2d panTranslate) {
+        if (img != null) {
+            int w = img.getWidth(null);
+            int h = img.getHeight(null);
+            float scaleX = (float) imgSize / w;
+            float scaleY = (float) imgSize / h;
+            gphx.drawImage(img, x + panTranslate.x, y + panTranslate.y,
+                    (int) (w * scaleX), (int) (h * scaleY), null);
+        }
+    }
+
+    private static void drawRotatedRect(Graphics2D g, int x, int y, int width, int height, Vector2d panTranslate) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        x += panTranslate.x;
+        y += panTranslate.y;
+        g2.rotate(Math.toRadians(isometricAngle), x, y);
+        g2.drawRect(x, y, width, height);
+        g2.dispose();
+    }
+
+    /**
+     * Expects coordinates in grid, translates to screen coordinates.
+     */
+    public static Vector2d rotatePoint(double x, double y) {
+        double d = Math.sqrt(2 * CELL_SIZE * CELL_SIZE);
+        double x2 = x * CELL_SIZE + y * d / 2 - x * d / 5;
+        double y2 = y * CELL_SIZE - y * d / 5 - x * d / 2;
+        y2 += dimension.width / 2.0;
+        return new Vector2d((int) x2, (int) y2);
+    }
+
+    /**
+     * Expects screen coordinates, returns coordinates in grid.
+     */
+    public static Vector2d rotatePointReverse(double x, double y) {
+        double d = Math.sqrt(2 * CELL_SIZE * CELL_SIZE);
+        y -= GameView.dimension.width / 2.0;
+        double x2 = (x * (CELL_SIZE - d / 5.0) - y * d / 2.0) / (CELL_SIZE * CELL_SIZE - 2 * CELL_SIZE * d / 5.0 + (d / 5) * (d / 5) + d * d / 4.0);
+        double y2 = (y + x2 * d / 2.0) / (CELL_SIZE - d / 5.0);
+        return new Vector2d((int) x2, (int) y2);
+    }
+
+    public void paintComponent(Graphics gx) {
         Graphics2D g = (Graphics2D) gx;
         paintWithGraphics(g);
     }
 
-    private void paintWithGraphics(Graphics2D g)
-    {
-        if(gameState == null)
+    private void paintWithGraphics(Graphics2D g) {
+        if (gameState == null)
             return;
 
         //For a better graphics, enable this: (be aware this could bring performance issues depending on your HW & OS).
@@ -183,8 +254,8 @@ public class GameView extends JComponent {
     private void updateActionableTiles() {
         actionable = new boolean[gridSize][gridSize];
         HashMap<Integer, ArrayList<Action>> actions = gameState.getCityActions();
-        for (Map.Entry<Integer, ArrayList<Action>> e: actions.entrySet()) {
-            for (Action a: e.getValue()) {
+        for (Map.Entry<Integer, ArrayList<Action>> e : actions.entrySet()) {
+            for (Action a : e.getValue()) {
                 if (a instanceof CityAction) {
                     Vector2d pos = ((CityAction) a).getTargetPos();
                     if (pos != null) {
@@ -196,9 +267,9 @@ public class GameView extends JComponent {
     }
 
     private void paintTerrains(Graphics2D g) {
-        for(int i = 0; i < gridSize; ++i) {
-            for(int j = 0; j < gridSize; ++j) {
-                Types.TERRAIN t = board.getTerrainAt(i,j);
+        for (int i = 0; i < gridSize; ++i) {
+            for (int j = 0; j < gridSize; ++j) {
+                Types.TERRAIN t = board.getTerrainAt(i, j);
                 Image toPaint;
                 if (t == null || t == FOG) {
                     toPaint = fogImg;
@@ -213,9 +284,9 @@ public class GameView extends JComponent {
     }
 
     private void paintCities(Graphics2D g) {
-        for(int i = 0; i < gridSize; ++i) {
-            for(int j = 0; j < gridSize; ++j) {
-                Types.TERRAIN t = board.getTerrainAt(i,j);
+        for (int i = 0; i < gridSize; ++i) {
+            for (int j = 0; j < gridSize; ++j) {
+                Types.TERRAIN t = board.getTerrainAt(i, j);
                 if (t == CITY) {
                     Image toPaint = t.getImage(null);
                     paintImageRotated(g, j * CELL_SIZE, i * CELL_SIZE, toPaint, CELL_SIZE, panTranslate);
@@ -225,13 +296,13 @@ public class GameView extends JComponent {
     }
 
     private void paintRoads(Graphics2D g) {
-        for(int i = 0; i < gridSize; ++i) {
+        for (int i = 0; i < gridSize; ++i) {
             for (int j = 0; j < gridSize; ++j) {
                 Vector2d cur = new Vector2d(i, j);
                 LinkedList<Vector2d> neighborhood = cur.neighborhood(1, 0, gridSize);
                 boolean anyRoads = false;
                 if (board.checkTradeNetwork(i, j)) {
-                    for (Vector2d n: neighborhood) {
+                    for (Vector2d n : neighborhood) {
                         if (board.checkTradeNetwork(n.x, n.y)) {
                             // Draw half road in that direction
                             Vector2d rotated = rotatePoint(j, i);
@@ -239,10 +310,10 @@ public class GameView extends JComponent {
                             double dx = (n.x - cur.x);
                             double dy = (n.y - cur.y);
                             boolean diagonal = Math.abs(dx) == 1 && Math.abs(dy) == 1;
-                            double imageAngleRad = Math.atan2(dx, dy) + Math.toRadians(isometricAngle+90);
+                            double imageAngleRad = Math.atan2(dx, dy) + Math.toRadians(isometricAngle + 90);
 
-                            int x = rotated.x + CELL_SIZE/4;
-                            int y = rotated.y - CELL_SIZE/2;
+                            int x = rotated.x + CELL_SIZE / 4;
+                            int y = rotated.y - CELL_SIZE / 2;
 
                             if (!diagonal) {
                                 paintImageRotated(g, x, y, roadVhalf, CELL_SIZE, panTranslate, imageAngleRad, x + CELL_SIZE / 2, y + CELL_SIZE / 2);
@@ -264,20 +335,23 @@ public class GameView extends JComponent {
     }
 
     private void paintResourcesBuildings(Graphics2D g) {
-        for(int i = 0; i < gridSize; ++i) {
-            for(int j = 0; j < gridSize; ++j) {
-                Types.TERRAIN t = board.getTerrainAt(i,j);
-                Types.RESOURCE r = board.getResourceAt(i,j);
-                if (actionable[i][j]) paintImageRotated(g, j * CELL_SIZE, i * CELL_SIZE, shineImg, CELL_SIZE, panTranslate);
+        for (int i = 0; i < gridSize; ++i) {
+            for (int j = 0; j < gridSize; ++j) {
+                Types.TERRAIN t = board.getTerrainAt(i, j);
+                Types.RESOURCE r = board.getResourceAt(i, j);
+                if (actionable[i][j])
+                    paintImageRotated(g, j * CELL_SIZE, i * CELL_SIZE, shineImg, CELL_SIZE, panTranslate);
                 int imgSize = (int) (CELL_SIZE * 0.75);
                 paintImageRotated(g, j * CELL_SIZE, i * CELL_SIZE, (r == null) ? null : r.getImage(t), imgSize, panTranslate);
 
-                Types.BUILDING b = board.getBuildingAt(i,j);
+                Types.BUILDING b = board.getBuildingAt(i, j);
                 if (b != null && b != Types.BUILDING.CUSTOMS_HOUSE && !(b.isTemple())) imgSize = CELL_SIZE;
-                paintImageRotated(g, j*CELL_SIZE, i*CELL_SIZE, (b == null) ? null : b.getImage(), imgSize, panTranslate);
+                paintImageRotated(g, j * CELL_SIZE, i * CELL_SIZE, (b == null) ? null : b.getImage(), imgSize, panTranslate);
             }
         }
     }
+
+    // *****************************************************************************************************************
 
     private void highlightTile(Graphics2D g, int highlightX, int highlightY) {
         if (highlightX != -1) {
@@ -293,16 +367,16 @@ public class GameView extends JComponent {
     }
 
     private void paintUnits(Graphics2D g) {
-        for(int i = 0; i < gridSize; ++i) {
-            for(int j = 0; j < gridSize; ++j) {
-                Unit u = board.getUnitAt(i,j);
+        for (int i = 0; i < gridSize; ++i) {
+            for (int j = 0; j < gridSize; ++j) {
+                Unit u = board.getUnitAt(i, j);
                 if (u != null) {
                     int imgSize = (int) (CELL_SIZE * 0.75);
                     if (u instanceof SuperUnit || u instanceof Catapult) imgSize = CELL_SIZE;
 
                     Vector2d rotated = rotatePoint(j, i);
-                    int x = rotated.x + CELL_SIZE*CELL_SIZE/4/imgSize;
-                    int y = (int)(rotated.y - imgSize/1.5);
+                    int x = rotated.x + CELL_SIZE * CELL_SIZE / 4 / imgSize;
+                    int y = (int) (rotated.y - imgSize / 1.5);
 
                     ArrayList<Action> possibleActions = gameState.getUnitActions(u);
                     boolean exhausted = (possibleActions == null || possibleActions.size() == 0);
@@ -314,14 +388,14 @@ public class GameView extends JComponent {
 
                     if (u.getType().isWaterUnit()) {
                         // Paint base land unit for water units
-                        int size = imgSize/2;
-                        paintUnit(g, x + CELL_SIZE/4, y + CELL_SIZE/4, board.getBaseLandUnit(u), size, imageTribeId, exhausted);
+                        int size = imgSize / 2;
+                        paintUnit(g, x + CELL_SIZE / 4, y + CELL_SIZE / 4, board.getBaseLandUnit(u), size, imageTribeId, exhausted);
                     }
 
                     Font f = g.getFont();
-                    g.setFont(new Font(f.getFontName(), Font.PLAIN, CELL_SIZE/5));
+                    g.setFont(new Font(f.getFontName(), Font.PLAIN, CELL_SIZE / 5));
                     g.setColor(Color.black);
-                    g.drawString(u.getCurrentHP() + "/" + u.getMaxHP(), x + g.getFont().getSize()/2 + panTranslate.x, y + panTranslate.y);
+                    g.drawString(u.getCurrentHP() + "/" + u.getMaxHP(), x + g.getFont().getSize() / 2 + panTranslate.x, y + panTranslate.y);
                     g.setFont(f);
                 }
             }
@@ -357,7 +431,7 @@ public class GameView extends JComponent {
                                         paintImageRotated(g, pos.y * CELL_SIZE, pos.x * CELL_SIZE, actionImg, CELL_SIZE, panTranslate);
                                     } else {
                                         Vector2d rotated = rotatePoint(pos.y, pos.x);
-                                        paintImage(g, rotated.x, rotated.y - CELL_SIZE/2, actionImg, CELL_SIZE, panTranslate);
+                                        paintImage(g, rotated.x, rotated.y - CELL_SIZE / 2, actionImg, CELL_SIZE, panTranslate);
                                     }
                                 }
                             }
@@ -370,7 +444,7 @@ public class GameView extends JComponent {
 
     private void paintOtherActions(Graphics2D g) {
         HashMap<Integer, ArrayList<Action>> actions = gameState.getUnitActions();
-        for (Map.Entry<Integer, ArrayList<Action>> e: actions.entrySet()) {
+        for (Map.Entry<Integer, ArrayList<Action>> e : actions.entrySet()) {
             for (Action a : e.getValue()) {
                 if (a.getActionType() == EXAMINE || a.getActionType() == CAPTURE) {
                     Image actionImg = Types.ACTION.getImage(a);
@@ -379,8 +453,8 @@ public class GameView extends JComponent {
 
                         if (pos != null) {
                             Vector2d rotated = rotatePoint(pos.y, pos.x);
-                            int imgSize = (int)(CELL_SIZE*0.5);
-                            paintImage(g, rotated.x + CELL_SIZE, rotated.y - imgSize/2,
+                            int imgSize = (int) (CELL_SIZE * 0.5);
+                            paintImage(g, rotated.x + CELL_SIZE, rotated.y - imgSize / 2,
                                     actionImg, imgSize, panTranslate);
                         }
                     }
@@ -389,95 +463,17 @@ public class GameView extends JComponent {
         }
     }
 
-    // *****************************************************************************************************************
-
-    private static void paintImageRotated(Graphics2D gphx, int x, int y, Image img, int imgSize, Vector2d panTranslate) {
-        if (img != null) {
-            int w = img.getWidth(null);
-            int h = img.getHeight(null);
-            float scaleX = (float)imgSize/w;
-            float scaleY = (float)imgSize/h;
-
-            Graphics2D g2 = (Graphics2D)gphx.create();
-            g2.translate(panTranslate.x, panTranslate.y + dimension.width/2.0);
-            g2.rotate(Math.toRadians(isometricAngle));
-            g2.drawImage(img, (int)(x + CELL_SIZE/2.0 - imgSize/2.0),
-                    (int)(y + CELL_SIZE/2.0 - imgSize/2.0),
-                    (int) (w*scaleX), (int) (h*scaleY), null);
-            g2.dispose();
-        }
-    }
-
-    private static void paintImageRotated(Graphics2D gphx, int x, int y, Image img, int imgSize, Vector2d panTranslate,
-                                          double angle, int xAnchor, int yAnchor) {
-        if (img != null) {
-            int w = img.getWidth(null);
-            int h = img.getHeight(null);
-            float scaleX = (float)imgSize/w;
-            float scaleY = (float)imgSize/h;
-
-            Graphics2D g2 = (Graphics2D)gphx.create();
-            g2.translate(panTranslate.x, panTranslate.y);
-            g2.rotate(angle, xAnchor, yAnchor);
-            g2.drawImage(img, x, y, (int) (w*scaleX), (int) (h*scaleY), null);
-            g2.dispose();
-        }
-    }
-
-    private static void paintImage(Graphics2D gphx, int x, int y, Image img, int imgSize, Vector2d panTranslate)
-    {
-        if (img != null) {
-            int w = img.getWidth(null);
-            int h = img.getHeight(null);
-            float scaleX = (float)imgSize/w;
-            float scaleY = (float)imgSize/h;
-            gphx.drawImage(img, x + panTranslate.x, y + panTranslate.y,
-                    (int) (w*scaleX), (int) (h*scaleY), null);
-        }
-    }
-
-    private static void drawRotatedRect(Graphics2D g, int x, int y, int width, int height, Vector2d panTranslate) {
-        Graphics2D g2 = (Graphics2D) g.create();
-        x += panTranslate.x;
-        y += panTranslate.y;
-        g2.rotate(Math.toRadians(isometricAngle), x, y);
-        g2.drawRect(x, y, width, height);
-        g2.dispose();
-    }
-
-    /**
-     * Expects coordinates in grid, translates to screen coordinates.
-     */
-    public static Vector2d rotatePoint(double x, double y) {
-        double d = Math.sqrt(2*CELL_SIZE*CELL_SIZE);
-        double x2 = x * CELL_SIZE + y * d/2 - x * d/5;
-        double y2 = y * CELL_SIZE - y * d/5 - x * d/2;
-        y2 += dimension.width/2.0;
-        return new Vector2d((int)x2, (int)y2);
-    }
-
-    /**
-     * Expects screen coordinates, returns coordinates in grid.
-     */
-    public static Vector2d rotatePointReverse(double x, double y) {
-        double d = Math.sqrt(2*CELL_SIZE*CELL_SIZE);
-        y -= GameView.dimension.width/2.0;
-        double x2 = (x*(CELL_SIZE-d/5.0) - y*d/2.0)/(CELL_SIZE*CELL_SIZE - 2*CELL_SIZE*d/5.0 + (d/5)*(d/5) + d*d/4.0);
-        double y2 = (y + x2 * d/2.0)/(CELL_SIZE - d/5.0);
-        return new Vector2d((int)x2, (int)y2);
-    }
-
     private void drawCityDecorations(Graphics2D g) {
-        for(int i = 0; i < gridSize; ++i) {
+        for (int i = 0; i < gridSize; ++i) {
             for (int j = 0; j < gridSize; ++j) {
                 Types.TERRAIN terrainAt = board.getTerrainAt(i, j);
                 if (terrainAt == CITY) {
-                    int d = (int)Math.sqrt(CELL_SIZE*CELL_SIZE*2);
-                    int fontSize = CELL_SIZE/3;
+                    int d = (int) Math.sqrt(CELL_SIZE * CELL_SIZE * 2);
+                    int fontSize = CELL_SIZE / 3;
                     Font textFont = new Font(getFont().getName(), Font.PLAIN, fontSize);
                     g.setFont(textFont);
 
-                    int cityID = board.getCityIdAt(i,j);
+                    int cityID = board.getCityIdAt(i, j);
                     City c = (City) board.getActor(cityID);
 
                     if (c != null) {
@@ -503,9 +499,9 @@ public class GameView extends JComponent {
                                 new Pair<>(new Vector2d(1, 0), new Vector2d(1, 1)),
                                 new Pair<>(new Vector2d(0, 0), new Vector2d(1, 0)),
                                 new Pair<>(new Vector2d(0, 1), new Vector2d(1, 1))};
-                        for (int k = 0; k < nCityTiles-1; k++) {
+                        for (int k = 0; k < nCityTiles - 1; k++) {
                             Vector2d t1 = tiles.get(k);
-                            for (int p = k+1; p < nCityTiles; p++) {
+                            for (int p = k + 1; p < nCityTiles; p++) {
                                 Vector2d t2 = tiles.get(p);
                                 if (t1.equals(t2)) continue;
                                 if (t1.x - t2.x == 1 && t1.y == t2.y) {  // t1 to the right of t2
@@ -558,13 +554,13 @@ public class GameView extends JComponent {
                         g.fillRect(nameRect.x + panTranslate.x, nameRect.y + panTranslate.y, nameRect.width, nameRect.height);
                         g.setColor(Color.WHITE);
 
-                        g.drawString(cityName, (int) (nameRect.x + (sections-2) * h + fontSize / 4.0 + panTranslate.x),
+                        g.drawString(cityName, (int) (nameRect.x + (sections - 2) * h + fontSize / 4.0 + panTranslate.x),
                                 (int) (nameRect.y + h * 1.1 - fontSize / 4.0 + panTranslate.y));
 
                         // Draw number of stars
-                        paintImage(g, (int) (nameRect.x + nameRect.width * (0.35 + (sections-2)*0.2) + SHADOW_OFFSET),
+                        paintImage(g, (int) (nameRect.x + nameRect.width * (0.35 + (sections - 2) * 0.2) + SHADOW_OFFSET),
                                 nameRect.y + SHADOW_OFFSET, starShadow, h, panTranslate);
-                        paintImage(g, (int) (nameRect.x + nameRect.width * (0.35 + (sections-2)*0.2)), nameRect.y, starImg, h, panTranslate);
+                        paintImage(g, (int) (nameRect.x + nameRect.width * (0.35 + (sections - 2) * 0.2)), nameRect.y, starImg, h, panTranslate);
                         drawStringShadow(g, production, (int) (nameRect.x + nameRect.width - fontSize * 0.75),
                                 (int) (nameRect.y + h * 1.1 - fontSize / 4.0));
                         g.setColor(Color.WHITE);
@@ -630,18 +626,17 @@ public class GameView extends JComponent {
                 ROUND_RECT_ARC, ROUND_RECT_ARC);
     }
 
-    private void drawStringShadow (Graphics2D g, String s, int x, int y) {
+    private void drawStringShadow(Graphics2D g, String s, int x, int y) {
         g.setColor(new Color(0, 0, 0, 122));
-        g.drawString(s, x+SHADOW_OFFSET + panTranslate.x, y+SHADOW_OFFSET + panTranslate.y);
+        g.drawString(s, x + SHADOW_OFFSET + panTranslate.x, y + SHADOW_OFFSET + panTranslate.y);
     }
-
 
     /**
      * Paints the board
+     *
      * @param gs current game state
      */
-    void paint(GameState gs)
-    {
+    void paint(GameState gs) {
         //The tribe Id of which the turn gs at this point
         //int gameTurn = 0;// gs.getTick() % gs.getTribes().length;
         gameState = gs; //.copy(gameTurn);
@@ -662,8 +657,8 @@ public class GameView extends JComponent {
 
         // Get position in screen coordinates, and set pan to the negative difference to center
         Vector2d screenPoint = rotatePoint(pos.y, pos.x);
-        panTranslate = new Vector2d(-screenPoint.x - CELL_SIZE/2 + dimension.width/2,
-                -screenPoint.y - CELL_SIZE/2 + dimension.height/2);
+        panTranslate = new Vector2d(-screenPoint.x - CELL_SIZE / 2 + dimension.width / 2,
+                -screenPoint.y - CELL_SIZE / 2 + dimension.height / 2);
     }
 
     public Vector2d getPanTranslate() {
@@ -672,17 +667,17 @@ public class GameView extends JComponent {
 
     /**
      * Gets the dimensions of the window.
+     *
      * @return the dimensions of the window.
      */
     public Dimension getPreferredSize() {
         return dimension;
     }
 
-
     private Image getContextImg(int i, int j, Types.TERRAIN t) {
         Image toPaint;
         boolean cornerUL = (i == 0 && j == 0);
-        boolean cornerDR = (i == gridSize - 1 && j == gridSize -1);
+        boolean cornerDR = (i == gridSize - 1 && j == gridSize - 1);
         Types.TERRAIN diagUR = null;
         if (i > 0 && j < gridSize - 1) diagUR = board.getTerrainAt(i - 1, j + 1);
 
@@ -718,7 +713,7 @@ public class GameView extends JComponent {
                     toPaint = t.getImage("down");
                 }
             } else if (top) {
-                if (t == SHALLOW_WATER && (j == gridSize-1 || diagUR == SHALLOW_WATER || diagUR == DEEP_WATER)) {
+                if (t == SHALLOW_WATER && (j == gridSize - 1 || diagUR == SHALLOW_WATER || diagUR == DEEP_WATER)) {
                     if (left) {
                         toPaint = t.getImage("top-left-ur");
                     } else {
@@ -750,9 +745,9 @@ public class GameView extends JComponent {
             }
         } else {
             // If this is the last tile on the row, or the tile underneath is water, get the '-down' img
-            boolean down = (i == gridSize - 1 || board.getTerrainAt(i+1, j) == SHALLOW_WATER);
+            boolean down = (i == gridSize - 1 || board.getTerrainAt(i + 1, j) == SHALLOW_WATER);
             // If the same is true for the column instead, this is a '-left' img
-            boolean left = (j == 0 || board.getTerrainAt(i, j-1) == SHALLOW_WATER);
+            boolean left = (j == 0 || board.getTerrainAt(i, j - 1) == SHALLOW_WATER);
 
             if (down) {
                 if (j == gridSize - 1) {
@@ -765,7 +760,7 @@ public class GameView extends JComponent {
                     if (left) {
                         if (j == 0) {
                             if (i < gridSize - 1 && (board.getTerrainAt(i, j + 1) == SHALLOW_WATER ||
-                                            board.getTerrainAt(i, j + 1) == DEEP_WATER)) {
+                                    board.getTerrainAt(i, j + 1) == DEEP_WATER)) {
                                 toPaint = t.getImage("down-left-el-dr");
                             } else {
                                 toPaint = t.getImage("down-left-el");
@@ -783,7 +778,7 @@ public class GameView extends JComponent {
                     } else {
                         if (j < gridSize - 1 && i < gridSize - 1 &&
                                 (board.getTerrainAt(i, j + 1) == SHALLOW_WATER ||
-                                board.getTerrainAt(i, j + 1) == DEEP_WATER)) {
+                                        board.getTerrainAt(i, j + 1) == DEEP_WATER)) {
                             toPaint = t.getImage("down-dr");
                         } else {
                             toPaint = t.getImage("down");
@@ -809,7 +804,7 @@ public class GameView extends JComponent {
                 Types.TERRAIN tl = board.getTerrainAt(i, j - 1);
                 Types.TERRAIN td = board.getTerrainAt(i + 1, j);
                 Types.TERRAIN tld = board.getTerrainAt(i + 1, j - 1);
-                if (i < gridSize-1 && j > 0 && (tld == SHALLOW_WATER || tld == DEEP_WATER) &&
+                if (i < gridSize - 1 && j > 0 && (tld == SHALLOW_WATER || tld == DEEP_WATER) &&
                         (tl != SHALLOW_WATER && tl != DEEP_WATER) &&
                         (td != SHALLOW_WATER && td != DEEP_WATER)) {
                     toPaint = t.getImage("dl");
@@ -870,7 +865,7 @@ public class GameView extends JComponent {
                     if (effectType == EFFECT.SLASH || effectType == EFFECT.CONVERT) {
                         int x = rotated.x + CELL_SIZE / 5;
                         int y = rotated.y - CELL_SIZE / 2;
-                        paintImageRotated(g, x, y, effectImage, CELL_SIZE, panTranslate, Math.PI / 2, x + CELL_SIZE/2, y + CELL_SIZE/2);
+                        paintImageRotated(g, x, y, effectImage, CELL_SIZE, panTranslate, Math.PI / 2, x + CELL_SIZE / 2, y + CELL_SIZE / 2);
                     }
                 }
                 effectDrawingIdx++;
@@ -920,10 +915,10 @@ public class GameView extends JComponent {
                     targets.addAll(ts);
                 }
 
-                for (Unit target: targets) {
+                for (Unit target : targets) {
                     Pair<Image, Vector2d> targetAnimationInfo = new Pair<>(weapon2, new Vector2d(target.getPosition().y * CELL_SIZE, target.getPosition().x * CELL_SIZE));
                     animationSpeed.add(Math.max(1.0,
-                            Math.min(25.0/(FRAME_DELAY+25), manhattanDistance(source.getPosition(), target.getPosition()) * (2.5/(FRAME_DELAY+25)))));
+                            Math.min(25.0 / (FRAME_DELAY + 25), manhattanDistance(source.getPosition(), target.getPosition()) * (2.5 / (FRAME_DELAY + 25)))));
                     actionAnimationUnitsTribe.add(new Pair<>(source.getTribeId(), target.getTribeId()));
                     sourceTargetAnimationInfo.add(new Pair<>(sourceAnimationInfo, targetAnimationInfo));
                 }
@@ -938,8 +933,8 @@ public class GameView extends JComponent {
         if (sourceTargetAnimationInfo.size() > 0) {
             ArrayList<Integer> finished = new ArrayList<>();
             for (int i = 0; i < sourceTargetAnimationInfo.size(); i++) {
-                Pair<Image,Vector2d> source = sourceTargetAnimationInfo.get(i).getFirst();
-                Pair<Image,Vector2d> target = sourceTargetAnimationInfo.get(i).getSecond();
+                Pair<Image, Vector2d> source = sourceTargetAnimationInfo.get(i).getFirst();
+                Pair<Image, Vector2d> target = sourceTargetAnimationInfo.get(i).getSecond();
 
                 // Sprite not yet reached its destination, paint current and calculate next
                 Vector2d currentPosition = source.getSecond().copy();
@@ -958,7 +953,7 @@ public class GameView extends JComponent {
                 Vector2d rotated = rotatePoint(1.0 * currentPosition.x / CELL_SIZE, 1.0 * currentPosition.y / CELL_SIZE);
                 int x = rotated.x + CELL_SIZE / 2;
                 int y = rotated.y - CELL_SIZE / 4;
-                paintImageRotated(g, x, y, source.getFirst(), CELL_SIZE / 2, panTranslate, imageAngleRad, x + CELL_SIZE/4, y + CELL_SIZE/4);
+                paintImageRotated(g, x, y, source.getFirst(), CELL_SIZE / 2, panTranslate, imageAngleRad, x + CELL_SIZE / 4, y + CELL_SIZE / 4);
 
                 if (currentPosition.equalsPlusError(target.getSecond(), CELL_SIZE * 0.5)) {
                     // Reached destination, no more drawing. Reset animation variables and unpause game, unless retaliation happening
@@ -971,7 +966,7 @@ public class GameView extends JComponent {
                     boolean finishAnimation = true;
                     if (animatedAction.getActionType() == ATTACK && target.getFirst() != null) {
                         boolean retaliates = new AttackCommand().isRetaliation((Attack) animatedAction, gameState);
-                        if(retaliates) {
+                        if (retaliates) {
                             // Retaliating! Reset variables to target's attack
                             Vector2d startPosition = target.getSecond().copy();
                             Vector2d targetPosition = board.getActor(animatedAction.getUnitId()).getPosition().copy();
@@ -984,13 +979,12 @@ public class GameView extends JComponent {
                         }
                     }
 
-                    if(finishAnimation)
-                    {
+                    if (finishAnimation) {
                         finished.add(i);
                     }
                 }
             }
-            for (int i: finished) {
+            for (int i : finished) {
                 sourceTargetAnimationInfo.remove(i);
                 animationSpeed.remove(i);
                 actionAnimationUnitsTribe.remove(i);
@@ -1009,5 +1003,13 @@ public class GameView extends JComponent {
             return a;
         }
         return null;
+    }
+
+    enum EFFECT {
+        EXPLOSION,
+        SLASH,
+        HEAL,
+        CONVERT,
+        PIERCE
     }
 }

@@ -17,7 +17,7 @@ public class DisbandFactory implements ActionFactory {
         Unit unit = (Unit) actor;
 
         Disband disbandAction = new Disband(unit.getActorId());
-        if(disbandAction.isFeasible(gs))
+        if (disbandAction.isFeasible(gs))
             disbands.add(disbandAction);
 
         return disbands;

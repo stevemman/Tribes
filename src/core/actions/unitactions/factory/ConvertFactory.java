@@ -19,19 +19,18 @@ public class ConvertFactory implements ActionFactory {
         LinkedList<Action> converts = new LinkedList<>();
 
         //Only if unit can attack.
-        if(unit.canAttack()) {
+        if (unit.canAttack()) {
             Board b = gs.getBoard();
             Vector2d position = unit.getPosition();
 
             LinkedList<Vector2d> potentialTiles = position.neighborhood(unit.RANGE, 0, b.getSize()); //use neighbourhood for board limits
             for (Vector2d tile : potentialTiles) {
                 Unit target = b.getUnitAt(tile.x, tile.y);
-                if(target != null && target.getTribeId() != unit.getTribeId())
-                {
+                if (target != null && target.getTribeId() != unit.getTribeId()) {
                     // Check if there is actually a unit there (and it's not me)
                     Convert c = new Convert(unit.getActorId());
                     c.setTargetId(target.getActorId());
-                    if(c.isFeasible(gs)){
+                    if (c.isFeasible(gs)) {
                         converts.add(c);
                     }
                 }

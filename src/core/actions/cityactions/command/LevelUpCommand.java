@@ -2,6 +2,7 @@ package core.actions.cityactions.command;
 
 import core.TribesConfig;
 import core.Types;
+import core.Types.CITY_LEVEL_UP;
 import core.actions.Action;
 import core.actions.ActionCommand;
 import core.actions.cityactions.LevelUp;
@@ -10,14 +11,13 @@ import core.actors.Tribe;
 import core.actors.units.Unit;
 import core.game.GameState;
 import utils.Vector2d;
-import core.Types.CITY_LEVEL_UP;
 
 public class LevelUpCommand implements ActionCommand {
 
     @Override
     public boolean execute(Action a, GameState gs) {
-        LevelUp action = (LevelUp)a;
-        if(!action.isFeasible(gs))
+        LevelUp action = (LevelUp) a;
+        if (!action.isFeasible(gs))
             return false;
 
         int cityId = action.getCityId();
@@ -26,15 +26,14 @@ public class LevelUpCommand implements ActionCommand {
         Vector2d cityPos = city.getPosition();
         CITY_LEVEL_UP bonus = action.getBonus();
 
-        if(bonus.grantsMonument())
+        if (bonus.grantsMonument())
             tribe.cityMaxedUp();
 
         tribe.addScore(bonus.getLevelUpPoints());
         city.addPointsWorth(bonus.getLevelUpPoints());
         city.levelUp();
 
-        switch(bonus)
-        {
+        switch (bonus) {
             case WORKSHOP:
                 city.addProduction(TribesConfig.CITY_LEVEL_UP_WORKSHOP_PROD);
                 break;
@@ -59,8 +58,7 @@ public class LevelUpCommand implements ActionCommand {
                 break;
             case SUPERUNIT:
                 Unit unitInCity = gs.getBoard().getUnitAt(cityPos.x, cityPos.y);
-                if(unitInCity != null)
-                {
+                if (unitInCity != null) {
                     gs.pushUnit(unitInCity, cityPos.x, cityPos.y);
                 }
 
