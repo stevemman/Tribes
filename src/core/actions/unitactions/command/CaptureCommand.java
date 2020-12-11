@@ -3,23 +3,21 @@ package core.actions.unitactions.command;
 import core.Types;
 import core.actions.Action;
 import core.actions.ActionCommand;
-import core.actions.unitactions.Attack;
 import core.actions.unitactions.Capture;
 import core.actors.City;
 import core.actors.Tribe;
 import core.actors.units.Unit;
 import core.game.Board;
 import core.game.GameState;
-import utils.Pair;
 import utils.Vector2d;
 
 public class CaptureCommand implements ActionCommand {
 
     @Override
     public boolean execute(Action a, GameState gs) {
-        Capture action = (Capture)a;
+        Capture action = (Capture) a;
         //Check if action is feasible before execution
-        if(action.isFeasible(gs)) {
+        if (action.isFeasible(gs)) {
             Types.TERRAIN captureType = action.getCaptureType();
             int unitId = action.getUnitId();
             int targetCityId = action.getTargetCity();
@@ -28,8 +26,7 @@ public class CaptureCommand implements ActionCommand {
             Board b = gs.getBoard();
             Tribe thisTribe = b.getTribe(unit.getTribeId());
 
-            if(captureType == Types.TERRAIN.CITY)
-            {
+            if (captureType == Types.TERRAIN.CITY) {
                 City targetCity = (City) gs.getActor(targetCityId);
                 Tribe targetTribe = b.getTribe(targetCity.getTribeId());
 
@@ -41,8 +38,7 @@ public class CaptureCommand implements ActionCommand {
                 unit.setStatus(Types.TURN_STATUS.FINISHED);
 
                 return b.capture(gs, thisTribe, targetCity.getPosition().x, targetCity.getPosition().y);
-            }else if(captureType == Types.TERRAIN.VILLAGE)
-            {
+            } else if (captureType == Types.TERRAIN.VILLAGE) {
                 //the unit that captures exhausts their turn
                 unit.setStatus(Types.TURN_STATUS.FINISHED);
 

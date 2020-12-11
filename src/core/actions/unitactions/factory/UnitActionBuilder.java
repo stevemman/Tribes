@@ -1,21 +1,17 @@
 package core.actions.unitactions.factory;
 
 import core.actions.Action;
-import core.actors.units.*;
+import core.actors.units.Unit;
 import core.game.GameState;
-import core.Types;
 
 import java.util.ArrayList;
 
-public class UnitActionBuilder
-{
+public class UnitActionBuilder {
 
-    public ArrayList<Action> getActions(GameState gs, Unit unit)
-    {
+    public ArrayList<Action> getActions(GameState gs, Unit unit) {
         ArrayList<Action> allActions = new ArrayList<>();
 
-        if(unit.getTribeId() != gs.getActiveTribeID())
-        {
+        if (unit.getTribeId() != gs.getActiveTribeID()) {
             System.out.println("ERROR: creating actions for unit " + unit.getActorId() + " that the current tribe (" + gs.getActiveTribeID() +
                     ") does not control (" + unit.getTribeId() + ").");
             return allActions;
@@ -24,7 +20,7 @@ public class UnitActionBuilder
         //Upgrade (always possible)
         allActions.addAll(new UpgradeFactory().computeActionVariants(unit, gs));
 
-        if(unit.isFinished())
+        if (unit.isFinished())
             return allActions;
 
         //Attack

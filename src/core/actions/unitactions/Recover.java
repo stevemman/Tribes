@@ -2,13 +2,11 @@ package core.actions.unitactions;
 
 import core.Types;
 import core.actions.Action;
-import core.game.GameState;
 import core.actors.units.Unit;
+import core.game.GameState;
 
-public class Recover extends UnitAction
-{
-    public Recover(int unitId)
-    {
+public class Recover extends UnitAction {
+    public Recover(int unitId) {
         super(Types.ACTION.RECOVER);
         super.unitId = unitId;
     }

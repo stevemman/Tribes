@@ -5,8 +5,7 @@ import utils.Vector2d;
 
 import static core.TribesConfig.*;
 
-public class Battleship extends Unit
-{
+public class Battleship extends Unit {
     private Types.UNIT baseLandUnit;
 
     public Battleship(Vector2d pos, int kills, boolean isVeteran, int cityId, int tribeId) {

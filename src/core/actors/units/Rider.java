@@ -5,8 +5,7 @@ import utils.Vector2d;
 
 import static core.TribesConfig.*;
 
-public class Rider extends Unit
-{
+public class Rider extends Unit {
     public Rider(Vector2d pos, int kills, boolean isVeteran, int cityId, int tribeId) {
         super(RIDER_ATTACK, RIDER_DEFENCE, RIDER_MOVEMENT, RIDER_MAX_HP, RIDER_RANGE, RIDER_COST, pos, kills, isVeteran, cityId, tribeId);
     }

@@ -1,12 +1,10 @@
 package core.actions.cityactions.factory;
 
-import core.Types;
 import core.actions.Action;
 import core.actions.ActionFactory;
 import core.actions.cityactions.Destroy;
 import core.actors.Actor;
 import core.actors.City;
-import core.game.Board;
 import core.game.GameState;
 import utils.Vector2d;
 
@@ -19,11 +17,10 @@ public class DestroyFactory implements ActionFactory {
         City city = (City) actor;
         LinkedList<Action> actions = new LinkedList<>();
         LinkedList<Vector2d> tiles = gs.getBoard().getCityTiles(city.getActorId());
-        for(Vector2d tile: tiles){
+        for (Vector2d tile : tiles) {
             Destroy action = new Destroy(city.getActorId());
             action.setTargetPos(new Vector2d(tile.x, tile.y));
-            if(action.isFeasible(gs))
-            {
+            if (action.isFeasible(gs)) {
                 actions.add(action);
             }
         }

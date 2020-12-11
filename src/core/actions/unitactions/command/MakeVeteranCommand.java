@@ -11,11 +11,10 @@ public class MakeVeteranCommand implements ActionCommand {
 
     @Override
     public boolean execute(Action a, GameState gs) {
-        MakeVeteran action = (MakeVeteran)a;
+        MakeVeteran action = (MakeVeteran) a;
         int unitId = action.getUnitId();
         Unit unit = (Unit) gs.getActor(unitId);
-        if(action.isFeasible(gs))
-        {
+        if (action.isFeasible(gs)) {
             unit.setVeteran(true);
             unit.setMaxHP(unit.getMaxHP() + TribesConfig.VETERAN_PLUS_HP);
             unit.setCurrentHP(unit.getMaxHP());

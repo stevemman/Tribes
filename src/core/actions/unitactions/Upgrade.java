@@ -4,15 +4,13 @@ import core.TechnologyTree;
 import core.Types;
 import core.actions.Action;
 import core.actors.Tribe;
-import core.game.GameState;
 import core.actors.units.Unit;
+import core.game.GameState;
 
 import static core.Types.UNIT.*;
 
-public class Upgrade extends UnitAction
-{
-    public Upgrade(Types.ACTION actionType, int unitId)
-    {
+public class Upgrade extends UnitAction {
+    public Upgrade(Types.ACTION actionType, int unitId) {
         super(actionType);
         super.unitId = unitId;
     }

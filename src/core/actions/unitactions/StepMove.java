@@ -1,6 +1,5 @@
 package core.actions.unitactions;
 
-import core.TechnologyTree;
 import core.Types;
 import core.actors.City;
 import core.actors.units.Unit;
@@ -12,13 +11,11 @@ import utils.graph.PathNode;
 
 import java.util.ArrayList;
 
-public class StepMove implements NeighbourHelper
-{
-    private GameState gs;
-    private Unit unit;
+public class StepMove implements NeighbourHelper {
+    private final GameState gs;
+    private final Unit unit;
 
-    public StepMove(GameState curGameState, Unit movingUnit)
-    {
+    public StepMove(GameState curGameState, Unit movingUnit) {
         this.gs = curGameState;
         this.unit = movingUnit;
     }
@@ -39,9 +36,9 @@ public class StepMove implements NeighbourHelper
         boolean onRoad = false;
 
         //Check if unit is on a neutral or a friendly road, cities also count as roads.
-        if(board.isRoad(from.x, from.y) || board.getTerrainAt(from.x, from.y) == Types.TERRAIN.CITY){
+        if (board.isRoad(from.x, from.y) || board.getTerrainAt(from.x, from.y) == Types.TERRAIN.CITY) {
             int cityId = board.getCityIdAt(from.x, from.y);
-            if(cityId == -1 || board.getTribe(unit.getTribeId()).controlsCity(cityId)) {
+            if (cityId == -1 || board.getTribe(unit.getTribeId()).controlsCity(cityId)) {
                 onRoad = true;
             }
         }
@@ -49,15 +46,14 @@ public class StepMove implements NeighbourHelper
         //Each one of the tree nodes added to "neighbours" must have a position (x,y) and also the cost of moving there from "from":
         //TreeNode tn = new TreeNode (vector2d pos, double stepCost)
         //We only add nodes to neighbours if costFrom+stepCost <= total move range of this.unit
-        for(Vector2d tile : from.neighborhood(1, 0, board.getSize())) {
+        for (Vector2d tile : from.neighborhood(1, 0, board.getSize())) {
             Types.TERRAIN terrain = board.getTerrainAt(tile.x, tile.y);
             double stepCost = 0.0;
             boolean zoneOfControl = false;
 
             //Can't move to tiles where there's a non-friendly unit
             Unit otherUnit = board.getUnitAt(tile.x, tile.y);
-            if (otherUnit != null && otherUnit.getTribeId() != unit.getTribeId())
-            {
+            if (otherUnit != null && otherUnit.getTribeId() != unit.getTribeId()) {
                 continue;
             }
 
@@ -141,13 +137,13 @@ public class StepMove implements NeighbourHelper
             }
 
             // Moving to zone of control is never a problem, but it consumes all the rest of the movement.
-            if(zoneOfControl){
+            if (zoneOfControl) {
                 stepCost = costFrom < unit.MOV ? (unit.MOV - costFrom) : unit.MOV;
-                if(costFrom + stepCost <= unit.MOV)
+                if (costFrom + stepCost <= unit.MOV)
                     neighbours.add(new PathNode(tile, stepCost));
 
-            //No zone of control, allow movement if part of MOV is still available.
-            }else if(Math.floor(costFrom + stepCost) <= unit.MOV){
+                //No zone of control, allow movement if part of MOV is still available.
+            } else if (Math.floor(costFrom + stepCost) <= unit.MOV) {
                 neighbours.add(new PathNode(tile, stepCost));
             }
 

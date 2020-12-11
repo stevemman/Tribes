@@ -22,17 +22,17 @@ public class ExamineCommand implements ActionCommand {
 
     @Override
     public boolean execute(Action a, GameState gs) {
-        Examine action = (Examine)a;
+        Examine action = (Examine) a;
         int unitId = action.getUnitId();
 
-        if(action.isFeasible(gs)) {
+        if (action.isFeasible(gs)) {
             Unit unit = (Unit) gs.getActor(unitId);
             Tribe t = gs.getTribe(unit.getTribeId());
             Random rnd = gs.getRandomGenerator();
             TechnologyTree technologyTree = t.getTechTree();
 
             int handlerCityId = t.getCitiesID().get(0);
-            if(t.controlsCapital())
+            if (t.controlsCapital())
                 handlerCityId = t.getCapitalID();
 
             boolean allTech = technologyTree.isEverythingResearched();
@@ -50,23 +50,22 @@ public class ExamineCommand implements ActionCommand {
                     //instead of a super unit, in the water we create a Battleship of out a warrior
                     Types.UNIT unitType = terr.isWater() ? Types.UNIT.BATTLESHIP : Types.UNIT.SUPERUNIT;
                     Unit newUnit = Types.UNIT.createUnit(spawnPos, 0, false, -1, unit.getTribeId(), unitType);
-                    if(terr.isWater())
-                    {
-                        ((Battleship)newUnit).setBaseLandUnit(Types.UNIT.WARRIOR);
+                    if (terr.isWater()) {
+                        ((Battleship) newUnit).setBaseLandUnit(Types.UNIT.WARRIOR);
                     }
 
                     Unit unitInCity = board.getUnitAt(spawnPos.x, spawnPos.y);
-                    if(unitInCity != null)
+                    if (unitInCity != null)
                         gs.pushUnit(unitInCity, spawnPos.x, spawnPos.y);
 
-                    board.addUnit((City)gs.getActor(handlerCityId), newUnit);
+                    board.addUnit((City) gs.getActor(handlerCityId), newUnit);
 
                     gs.getBoard().setResourceAt(spawnPos.x, spawnPos.y, null);
                     break;
 
                 case RESEARCH:
                     boolean researched = technologyTree.researchAtRandom(rnd);
-                    if(!researched)
+                    if (!researched)
                         System.out.println(gs.getTick() + " ERROR: researchAtRandom couldn't do any research.");
                     break;
 
@@ -85,7 +84,7 @@ public class ExamineCommand implements ActionCommand {
                     break;
             }
             Vector2d unitPos = unit.getPosition();
-            if(bonus != SUPERUNIT)
+            if (bonus != SUPERUNIT)
                 gs.getBoard().setResourceAt(unitPos.x, unitPos.y, null);
 
             unit.setStatus(Types.TURN_STATUS.FINISHED);

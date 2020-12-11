@@ -15,10 +15,10 @@ public class BurnForestCommand implements ActionCommand {
 
     @Override
     public boolean execute(Action a, GameState gs) {
-        BurnForest action = (BurnForest)a;
+        BurnForest action = (BurnForest) a;
         int cityId = action.getCityId();
         City city = (City) gs.getActor(cityId);
-        if (action.isFeasible(gs)){
+        if (action.isFeasible(gs)) {
             Vector2d targetPos = action.getTargetPos();
             Board b = gs.getBoard();
             Tribe t = gs.getTribe(city.getTribeId());

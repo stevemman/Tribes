@@ -14,8 +14,8 @@ public class DestroyCommand implements ActionCommand {
 
     @Override
     public boolean execute(Action a, GameState gs) {
-        Destroy action = (Destroy)a;
-        if (action.isFeasible(gs)){
+        Destroy action = (Destroy) a;
+        if (action.isFeasible(gs)) {
             int cityId = action.getCityId();
             Vector2d targetPos = action.getTargetPos();
             City city = (City) gs.getActor(cityId);
@@ -24,8 +24,7 @@ public class DestroyCommand implements ActionCommand {
             Board b = gs.getBoard();
             b.setBuildingAt(targetPos.x, targetPos.y, null);
 
-            if(buildingToRemove.type == Types.BUILDING.PORT)
-            {
+            if (buildingToRemove.type == Types.BUILDING.PORT) {
                 //If a port is removed, then the tile stops belonging to the trade network
                 b.destroyPort(targetPos.x, targetPos.y);
             }

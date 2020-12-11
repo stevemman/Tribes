@@ -16,11 +16,11 @@ public class RecoverCommand implements ActionCommand {
 
     @Override
     public boolean execute(Action a, GameState gs) {
-        Recover action = (Recover)a;
+        Recover action = (Recover) a;
         int unitId = action.getUnitId();
 
         Unit unit = (Unit) gs.getActor(unitId);
-        if(unit == null)
+        if (unit == null)
             return false;
 
         int currentHP = unit.getCurrentHP();
@@ -30,9 +30,9 @@ public class RecoverCommand implements ActionCommand {
         if (action.isFeasible(gs)) {
 
             int cityID = gs.getBoard().getCityIdAt(unit.getPosition().x, unit.getPosition().y);
-            if (cityID != -1){
+            if (cityID != -1) {
                 ArrayList<Integer> citesID = gs.getTribe(unit.getTribeId()).getCitiesID();
-                if (citesID.contains(cityID)){
+                if (citesID.contains(cityID)) {
                     addHP += RECOVER_IN_BORDERS_PLUS_HP;
                 }
             }

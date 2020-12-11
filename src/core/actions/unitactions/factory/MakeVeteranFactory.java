@@ -17,8 +17,7 @@ public class MakeVeteranFactory implements ActionFactory {
         LinkedList<Action> actions = new LinkedList<>();
 
         MakeVeteran action = new MakeVeteran(unit.getActorId());
-        if(action.isFeasible(gs))
-        {
+        if (action.isFeasible(gs)) {
             actions.add(action);
         }
 

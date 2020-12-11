@@ -8,22 +8,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
-public class AIStats
-{
-    //Action branching factor (per tick)
-    private HashMap<Integer, BigInteger> branchingFactorMult;
-    private HashMap<Integer, ArrayList<BigInteger>> branchingFactorAll;
-    private HashMap<Integer, ArrayList<Integer>> actionsPerStep;
-    private HashMap<Integer, ArrayList<Integer>> actionsPerStepArray;
-    private int playerId;
-
+public class AIStats {
     public int MAX = 0;
     public int MEAN = 1;
     public int FIRST = 2;
     public int REPORT = MAX;
+    //Action branching factor (per tick)
+    private final HashMap<Integer, BigInteger> branchingFactorMult;
+    private final HashMap<Integer, ArrayList<BigInteger>> branchingFactorAll;
+    private final HashMap<Integer, ArrayList<Integer>> actionsPerStep;
+    private final HashMap<Integer, ArrayList<Integer>> actionsPerStepArray;
+    private final int playerId;
 
-    public AIStats(int playerId)
-    {
+    public AIStats(int playerId) {
         this.playerId = playerId;
         branchingFactorMult = new HashMap<>();
         branchingFactorAll = new HashMap<>();
@@ -33,30 +30,27 @@ public class AIStats
 
     /**
      * Adds a branching factor
-     * @param turn turn for this branching factor.
+     *
+     * @param turn   turn for this branching factor.
      * @param values number of available actions at this point *per unit*
      */
-    public void addBranchingFactor(int turn, ArrayList<Integer> values)
-    {
+    public void addBranchingFactor(int turn, ArrayList<Integer> values) {
         BigInteger bInt = BigInteger.valueOf(1);
-        for(Integer val : values)
-        {
-            if(val == 0)
-            {
+        for (Integer val : values) {
+            if (val == 0) {
                 val = 1;
             }
 
             bInt = bInt.multiply(BigInteger.valueOf(val));
         }
 
-        if(!branchingFactorMult.containsKey(turn))
-        {
+        if (!branchingFactorMult.containsKey(turn)) {
             branchingFactorMult.put(turn, bInt);
 
             ArrayList<BigInteger> newList = new ArrayList<>();
             newList.add(bInt);
             branchingFactorAll.put(turn, newList);
-        }else{
+        } else {
             BigInteger prevValue = branchingFactorMult.get(turn);
             BigInteger newValue = prevValue.multiply(bInt);
             branchingFactorMult.put(turn, newValue);
@@ -66,10 +60,8 @@ public class AIStats
         }
     }
 
-    public void addActionsPerStep(int turn, int n_actions)
-    {
-        if(!actionsPerStep.containsKey(turn))
-        {
+    public void addActionsPerStep(int turn, int n_actions) {
+        if (!actionsPerStep.containsKey(turn)) {
             ArrayList<Integer> newList = new ArrayList<>();
             newList.add(n_actions);
             actionsPerStep.put(turn, newList);
@@ -77,14 +69,13 @@ public class AIStats
             ArrayList<Integer> newList2 = new ArrayList<>();
             newList2.add(n_actions);
             actionsPerStepArray.put(turn, newList2);
-        }else{
+        } else {
             ArrayList<Integer> listAvg = actionsPerStepArray.get(turn);
             listAvg.add(n_actions);
         }
     }
 
-    public void print()
-    {
+    public void print() {
         NumberFormat formatter = new DecimalFormat("0.######E0", DecimalFormatSymbols.getInstance(Locale.ROOT));
 //
 //        System.out.print("Branching Factor (Turn): " + playerId + ", "  + branchingFactorMult.size() + ", ");
@@ -126,11 +117,10 @@ public class AIStats
 //        }
 //        System.out.println();
 
-        System.out.print("Actions Per Step (" + REPORT + "): " + playerId + ", "  + branchingFactorMult.size() + ", ");
-        for(Integer it : actionsPerStep.keySet())
-        {
+        System.out.print("Actions Per Step (" + REPORT + "): " + playerId + ", " + branchingFactorMult.size() + ", ");
+        for (Integer it : actionsPerStep.keySet()) {
             StatSummary ss2 = new StatSummary();
-            for(Integer val : actionsPerStep.get(it)) {
+            for (Integer val : actionsPerStep.get(it)) {
                 ss2.add(val);
             }
 
@@ -142,11 +132,10 @@ public class AIStats
         }
         System.out.println();
 
-        System.out.print("Actions Per Step Avg (" + REPORT + "): " + playerId + ", "  + branchingFactorMult.size() + ", ");
-        for(Integer it : actionsPerStepArray.keySet())
-        {
+        System.out.print("Actions Per Step Avg (" + REPORT + "): " + playerId + ", " + branchingFactorMult.size() + ", ");
+        for (Integer it : actionsPerStepArray.keySet()) {
             StatSummary ss2 = new StatSummary();
-            for(Integer val : actionsPerStepArray.get(it)) {
+            for (Integer val : actionsPerStepArray.get(it)) {
                 ss2.add(val);
             }
 
@@ -158,12 +147,11 @@ public class AIStats
         }
         System.out.println();
 
-        System.out.print("Branching factor mult (" + REPORT + "): " + playerId + ", "  + branchingFactorMult.size() + ", ");
-        for(Integer it : actionsPerStepArray.keySet())
-        {
+        System.out.print("Branching factor mult (" + REPORT + "): " + playerId + ", " + branchingFactorMult.size() + ", ");
+        for (Integer it : actionsPerStepArray.keySet()) {
             BigInteger bInt = BigInteger.valueOf(1);
-            for(Integer val : actionsPerStepArray.get(it)) {
-                if(val > 0) {
+            for (Integer val : actionsPerStepArray.get(it)) {
+                if (val > 0) {
                     BigInteger other = BigInteger.valueOf(val);
                     bInt = bInt.multiply(other);
                 }
@@ -177,11 +165,10 @@ public class AIStats
         }
         System.out.println();
 
-        System.out.print("#moves in turn: " + playerId + ", "  + branchingFactorMult.size() + ", ");
-        for(Integer it : branchingFactorAll.keySet())
-        {
+        System.out.print("#moves in turn: " + playerId + ", " + branchingFactorMult.size() + ", ");
+        for (Integer it : branchingFactorAll.keySet()) {
             StatSummary ss = new StatSummary();
-            for(BigInteger val : branchingFactorAll.get(it))
+            for (BigInteger val : branchingFactorAll.get(it))
                 ss.add(val);
 //            System.out.print(ss.mean() + " (" + ss.stdErr() + ") ");
             System.out.printf("%d ", ss.n());

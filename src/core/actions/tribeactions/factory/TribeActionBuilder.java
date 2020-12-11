@@ -1,23 +1,17 @@
 package core.actions.tribeactions.factory;
 
 import core.actions.Action;
-import core.actions.tribeactions.factory.BuildRoadFactory;
-import core.actions.tribeactions.factory.EndTurnFactory;
-import core.actions.tribeactions.factory.ResearchTechFactory;
 import core.actors.Tribe;
 import core.game.GameState;
 
 import java.util.ArrayList;
 
-public class TribeActionBuilder
-{
+public class TribeActionBuilder {
 
-    public ArrayList<Action> getActions(GameState gs, Tribe tribe)
-    {
+    public ArrayList<Action> getActions(GameState gs, Tribe tribe) {
         ArrayList<Action> allActions = new ArrayList<>();
 
-        if(tribe.getTribeId() != gs.getActiveTribeID())
-        {
+        if (tribe.getTribeId() != gs.getActiveTribeID()) {
             System.out.println("ERROR: creating actions for a tribe that is not the active one.");
             return allActions;
         }

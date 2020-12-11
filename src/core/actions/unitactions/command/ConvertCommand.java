@@ -3,22 +3,19 @@ package core.actions.unitactions.command;
 import core.Types;
 import core.actions.Action;
 import core.actions.ActionCommand;
-import core.actions.unitactions.Capture;
 import core.actions.unitactions.Convert;
 import core.actors.City;
 import core.actors.Tribe;
 import core.actors.units.Unit;
-import core.game.Board;
 import core.game.GameState;
-import utils.Vector2d;
 
 public class ConvertCommand implements ActionCommand {
 
     @Override
     public boolean execute(Action a, GameState gs) {
-        Convert action = (Convert)a;
+        Convert action = (Convert) a;
         //Check if action is feasible before execution
-        if(action.isFeasible(gs)) {
+        if (action.isFeasible(gs)) {
             int unitId = action.getUnitId();
             int targetId = action.getTargetId();
             Unit target = (Unit) gs.getActor(targetId);

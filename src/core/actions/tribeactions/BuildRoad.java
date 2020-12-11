@@ -1,24 +1,26 @@
 package core.actions.tribeactions;
-import core.TribesConfig;
+
+import core.Types;
 import core.actions.Action;
 import core.actors.Tribe;
 import core.game.GameState;
 import utils.Vector2d;
-import core.Types;
 
 public class BuildRoad extends TribeAction {
 
     private Vector2d position;
-    public BuildRoad(int tribeId)
-    {
+
+    public BuildRoad(int tribeId) {
         super(Types.ACTION.BUILD_ROAD);
         this.tribeId = tribeId;
     }
-    public void setPosition(Vector2d position){
-        this.position = position.copy();
-    }
+
     public Vector2d getPosition() {
         return position;
+    }
+
+    public void setPosition(Vector2d position) {
+        this.position = position.copy();
     }
 
     @Override
@@ -28,7 +30,7 @@ public class BuildRoad extends TribeAction {
         Tribe tribe = gs.getTribe(tribeId);
 
         //This tribe should be able to build roads in general.
-        if(!tribe.canBuildRoads())
+        if (!tribe.canBuildRoads())
             return false;
 
         //... and also in this position

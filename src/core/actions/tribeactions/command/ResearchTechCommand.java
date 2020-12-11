@@ -11,9 +11,8 @@ public class ResearchTechCommand implements ActionCommand {
 
     @Override
     public boolean execute(Action a, GameState gs) {
-        ResearchTech action = (ResearchTech)a;
-        if(action.isFeasible(gs))
-        {
+        ResearchTech action = (ResearchTech) a;
+        if (action.isFeasible(gs)) {
             //Research tech
             Types.TECHNOLOGY tech = action.getTech();
             int tribeId = action.getTribeId();
@@ -24,8 +23,7 @@ public class ResearchTechCommand implements ActionCommand {
             tribe.addScore(tech.getPoints());
 
             //Flag if research tree is completed.
-            if (tribe.getTechTree().isEverythingResearched())
-            {
+            if (tribe.getTechTree().isEverythingResearched()) {
                 tribe.allResearched();
             }
             return true;
