@@ -26,7 +26,7 @@ public class AttackFM {
     private static SavedModelBundle model;
     private static final AtomicBoolean initialized = new AtomicBoolean(false);
 
-    public synchronized static boolean use(GameState gs, Action action) {
+    public synchronized static boolean use(Action action, GameState gs) {
         String[] splitDesc = action.toString().split(" ");
         int sourceId = Integer.parseInt(splitDesc[3]);
         int targetId = Integer.parseInt(splitDesc[6]);

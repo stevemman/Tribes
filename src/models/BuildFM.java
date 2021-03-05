@@ -32,7 +32,7 @@ public class BuildFM {
     private static final AtomicBoolean initializedPop = new AtomicBoolean(false);
     private static final AtomicBoolean initializedPro = new AtomicBoolean(false);
 
-    public synchronized static boolean use(GameState gs, Action action) {
+    public synchronized static boolean use(Action action, GameState gs) {
         //Extract data from the action description.
         String[] splitDesc = action.toString().split(" ");
         int cityID = Integer.parseInt(splitDesc[3]);

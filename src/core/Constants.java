@@ -6,7 +6,7 @@ public class Constants {
     public static boolean KEEP_LOG = false;
     public static String LOG_PATH = "./data.csv";
     public static boolean VERBOSE = false;
-    public static boolean VISUALS = true;
+    public static boolean VISUALS = false;
     public static boolean WRITE_SAVEGAMES = false;
     public static boolean DISABLE_NON_HUMAN_GRID_HIGHLIGHT = true;  // If true, human observing/playing doesn't have access to actions of non-human players
     public static int FRAME_DELAY = 0;// 500; //1000;

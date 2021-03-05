@@ -1,5 +1,6 @@
 package core.game;
 
+import core.Constants;
 import core.TechnologyTree;
 import core.TribesConfig;
 import core.Types;
@@ -13,6 +14,8 @@ import core.actions.unitactions.factory.UnitActionBuilder;
 import core.actors.*;
 import core.actors.units.Unit;
 import core.levelgen.LevelGenerator;
+import models.AttackFM;
+import models.BuildFM;
 import utils.file.IO;
 import utils.Vector2d;
 
@@ -315,7 +318,23 @@ public class GameState {
             boolean executed = false;
             ActionCommand ac = action.getActionType().getCommand();
             if(ac != null)
-                executed = ac.execute(action, this);
+                //Check if the appropriate learned FM should be used.
+                if(action.getActionType() == Types.ACTION.ATTACK && Constants.USE_ATTACK_FM) {
+                    //Learned FM for Attack.
+                    System.out.println("Hello from Attack FM");
+                    executed = AttackFM.use(action, this);
+
+                } else if(action.getActionType() == Types.ACTION.BUILD && Constants.USE_BUILD_FM) {
+                    //Learned FM for Build.
+                    System.out.println("Hello from Build FM");
+                    executed = BuildFM.use(action, this);
+
+                }
+                //Use the standard FM.
+                else {
+                    System.out.println("Hello from standard FM");
+                    executed = ac.execute(action, this);
+                }
 
             if(!executed && ac != null) {
                 System.out.println("FM: Action [" + action + "] couldn't execute?");
