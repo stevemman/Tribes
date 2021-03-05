@@ -9,3 +9,4 @@ save/*
 res/
 out/
 .idea/
+lib/libtensorflow-1.14.0.jar
