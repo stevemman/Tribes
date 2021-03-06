@@ -321,18 +321,13 @@ public class GameState {
                 //Check if the appropriate learned FM should be used.
                 if(action.getActionType() == Types.ACTION.ATTACK && Constants.USE_ATTACK_FM) {
                     //Learned FM for Attack.
-                    System.out.println("Hello from Attack FM");
                     executed = AttackFM.use(action, this);
-
                 } else if(action.getActionType() == Types.ACTION.BUILD && Constants.USE_BUILD_FM) {
                     //Learned FM for Build.
-                    System.out.println("Hello from Build FM");
                     executed = BuildFM.use(action, this);
-
                 }
                 //Use the standard FM.
                 else {
-                    System.out.println("Hello from standard FM");
                     executed = ac.execute(action, this);
                 }
 
